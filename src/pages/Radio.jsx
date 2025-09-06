@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaArrowLeft } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { FaArrowLeft, FaHeart } from 'react-icons/fa';
 import { games } from '../data/games';
 import GameCard from '../components/GameCard';
 import StationCard from '../components/StationCard';
@@ -27,7 +26,10 @@ export default function Radio() {
   const [isMuted, setIsMuted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('all');
-  const [favorites, setFavorites] = useState(new Set());
+  const [favorites, setFavorites] = useState(() => {
+    const saved = localStorage.getItem('gta-radio-favorites');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
   const [recentlyPlayed, setRecentlyPlayed] = useState([]);
   const [showMiniPlayer, setShowMiniPlayer] = useState(false);
 
@@ -64,6 +66,7 @@ export default function Radio() {
       newFavorites.add(stationId);
     }
     setFavorites(newFavorites);
+    localStorage.setItem('gta-radio-favorites', JSON.stringify([...newFavorites]));
   };
 
   const addToRecentlyPlayed = (station) => {
@@ -81,6 +84,24 @@ export default function Radio() {
       const matchesGenre = selectedGenre === 'all';
       return matchesSearch && matchesGenre;
     });
+  };
+
+  // Get active stations (those with audio available)
+  const getActiveStations = (stations) => {
+    return stations.filter(station => station.audioUrl !== null);
+  };
+
+  // Get liked stations from all games
+  const getLikedStations = () => {
+    const allStations = [];
+    Object.values(gameData).forEach(game => {
+      game.stations.forEach(station => {
+        if (favorites.has(station.id)) {
+          allStations.push({ ...station, gameName: game.name });
+        }
+      });
+    });
+    return allStations;
   };
 
   const handleGameSelect = (game) => {
@@ -212,6 +233,38 @@ export default function Radio() {
     }
   }, [currentStation, isFocusMode]);
 
+  // Dynamic title update based on what's playing
+  useEffect(() => {
+    const updateTitle = () => {
+      if (!currentStation) {
+        document.title = 'GTA Radio';
+        return;
+      }
+
+      if (!isPlaying) {
+        document.title = `${currentStation.name} - GTA Radio`;
+        return;
+      }
+
+      if (nowPlaying.type === 'Song' && nowPlaying.artist && nowPlaying.title) {
+        document.title = `♫ ${nowPlaying.artist} - ${nowPlaying.title} | ${currentStation.name}`;
+      } else if (nowPlaying.type === 'DJ' && nowPlaying.title) {
+        document.title = `🎙️ ${nowPlaying.title} | ${currentStation.name}`;
+      } else if (nowPlaying.artist && nowPlaying.title) {
+        document.title = `${nowPlaying.artist} - ${nowPlaying.title} | ${currentStation.name}`;
+      } else {
+        document.title = `${currentStation.name} - GTA Radio`;
+      }
+    };
+
+    updateTitle();
+
+    // Cleanup: Reset title when component unmounts
+    return () => {
+      document.title = 'GTA Radio';
+    };
+  }, [currentStation, isPlaying, nowPlaying]);
+
   const LiveIndicator = ({ className = '' }) => isPlaying && (
     <div className={`flex items-center space-x-2 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${className}`}>
         <span className="w-2 h-2 bg-white rounded-full animate-blink"></span>
@@ -335,17 +388,9 @@ export default function Radio() {
           ) : (
             // All Games View
             <>
-              <header className="flex items-center justify-between mb-8">
-                <div>
-                  <h1 className="text-4xl font-extrabold text-white">GTA Radio Stations</h1>
-                  <p className="text-gray-400 mt-1">Live, synchronized radio from across the series.</p>
-                </div>
-                <Link 
-                  to="/"
-                  className="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/40 rounded-lg transition-all duration-200 text-white text-sm"
-                >
-                  ← Home
-                </Link>
+              <header className="mb-8">
+                <h1 className="text-4xl font-extrabold text-white">GTA Radio Stations</h1>
+                <p className="text-gray-400 mt-1">Live, synchronized radio from across the series.</p>
               </header>
               
               <section className="mt-8">
@@ -390,28 +435,75 @@ export default function Radio() {
                 </div>
               </section>
 
-              {/* Quick Access to Current Game Stations */}
+              {/* Liked Channels Section */}
+              {getLikedStations().length > 0 && (
+                <section className="mt-8">
+                  <div className="flex items-center gap-2 mb-4">
+                    <FaHeart className="text-pink-500 w-5 h-5" />
+                    <h2 className="text-2xl font-bold">Liked Channels</h2>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    {getLikedStations().slice(0, 6).map(station => (
+                      <div key={station.id} className="relative">
+                        <StationCard 
+                          station={station} 
+                          onSelect={handleStationSelect} 
+                          isSelected={currentStation?.id === station.id} 
+                          isPlaying={isPlaying} 
+                        />
+                        <div className="absolute top-2 left-2 text-xs bg-pink-500/90 backdrop-blur-sm text-white px-2 py-1 rounded-full z-10">
+                          {station.gameName.split(' - ')[1] || station.gameName}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {getLikedStations().length > 6 && (
+                    <p className="mt-4 text-gray-400 text-sm">
+                      +{getLikedStations().length - 6} more liked stations
+                    </p>
+                  )}
+                </section>
+              )}
+
+              {/* Quick Access to Current Game Active Stations */}
               <section className="mt-8">
-                <h2 className="text-2xl font-bold mb-4">{currentGame.name} - Quick Access</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {currentGame.stations.slice(0, 6).map(station => (
-                    <StationCard 
-                      key={station.id} 
-                      station={station} 
-                      onSelect={handleStationSelect} 
-                      isSelected={currentStation?.id === station.id} 
-                      isPlaying={isPlaying} 
-                    />
-                  ))}
-                </div>
-                {currentGame.stations.length > 6 && (
-                  <button 
-                    onClick={() => handleGameSelect(currentGame)}
-                    className="mt-4 px-4 py-2 bg-pink-500/20 hover:bg-pink-500/30 border border-pink-500/50 rounded-lg transition-colors text-pink-300"
-                  >
-                    View All {currentGame.stations.length} Stations →
-                  </button>
-                )}
+                <h2 className="text-2xl font-bold mb-4">{currentGame.name} - Active Stations</h2>
+                {(() => {
+                  const activeStations = getActiveStations(currentGame.stations);
+                  return activeStations.length > 0 ? (
+                    <>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                        {activeStations.slice(0, 6).map(station => (
+                          <StationCard 
+                            key={station.id} 
+                            station={station} 
+                            onSelect={handleStationSelect} 
+                            isSelected={currentStation?.id === station.id} 
+                            isPlaying={isPlaying} 
+                          />
+                        ))}
+                      </div>
+                      {activeStations.length > 6 && (
+                        <button 
+                          onClick={() => handleGameSelect(currentGame)}
+                          className="mt-4 px-4 py-2 bg-pink-500/20 hover:bg-pink-500/30 border border-pink-500/50 rounded-lg transition-colors text-pink-300"
+                        >
+                          View All {activeStations.length} Active Stations →
+                        </button>
+                      )}
+                      {currentGame.stations.length > activeStations.length && (
+                        <p className="mt-2 text-gray-400 text-sm">
+                          {currentGame.stations.length - activeStations.length} stations coming soon
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-8">
+                      <h3 className="text-xl font-bold text-gray-400 mb-2">No Active Stations</h3>
+                      <p className="text-gray-500">All stations for {currentGame.name} are coming soon!</p>
+                    </div>
+                  );
+                })()}
               </section>
             </>
           )}
@@ -466,6 +558,8 @@ export default function Radio() {
           0%, 100% { opacity: 1; }
           50% { opacity: .5; }
         }
+        .hover\\:scale-102:hover { transform: scale(1.02); }
+        .hover\\:scale-105:hover { transform: scale(1.05); }
 
         /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar {
