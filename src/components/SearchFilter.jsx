@@ -5,8 +5,7 @@ const SearchFilter = ({
   searchQuery, 
   onSearchChange, 
   selectedGenre, 
-  onGenreChange, 
-  stations 
+  onGenreChange
 }) => {
   // Get unique genres from stations (for now, only 'all' since we don't have genres yet)
   const genres = ['all'];

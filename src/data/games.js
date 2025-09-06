@@ -1,9 +1,23 @@
 // GTA Radio Games Data
-// Assets are organized by game for better maintainability
+// Local asset imports for logos and banners per game
 
 import vcsLogo from '../assets/games/vcs/vcs-logo.png';
 import vcsBanner from '../assets/games/vcs/vcs-banner.png';
-import vcsBackground from '../assets/games/vcs/vcs-bg.png';
+
+import vcLogo from '../assets/games/vc/vc-logo.png';
+import vcBanner from '../assets/games/vc/vc-banner.png';
+
+import saLogo from '../assets/games/sa/sa-logo.png';
+import saBanner from '../assets/games/sa/sa-banner.png';
+
+import gta3Logo from '../assets/games/gta3/gta3-logo.png';
+import gta3Banner from '../assets/games/gta3/gta3-banner.png';
+
+import gtaivLogo from '../assets/games/gtaiv/gtaiv-logo.png';
+import gtaivBanner from '../assets/games/gtaiv/gtaiv-banner.png';
+
+import gtavLogo from '../assets/games/gtav/gtav-logo.png';
+import gtavBanner from '../assets/games/gtav/gtav-banner.png';
 
 export const games = {
   vcs: {
@@ -11,7 +25,7 @@ export const games = {
     name: 'Grand Theft Auto - Vice City Stories',
     logo: vcsLogo,
     banner: vcsBanner,
-    background: 'https://placehold.co/1920x1080/000000/ffffff?text=VCS+Background',
+    background: '#000000',
 
     stations: [
       {
@@ -111,36 +125,41 @@ export const games = {
   vc: { 
     id: 'vc', 
     name: 'Grand Theft Auto - Vice City', 
-    logo: 'https://placehold.co/400x150/FF1493/ffffff?text=Vice+City', 
-    background: 'https://placehold.co/1920x1080/FF1493/000000?text=Vice+City+Background', 
+    logo: vcLogo,
+    banner: vcBanner,
+    background: '#0a0a0a', 
     stations: [] 
   },
   sa: { 
     id: 'sa', 
     name: 'Grand Theft Auto - San Andreas', 
-    logo: 'https://placehold.co/400x150/32CD32/ffffff?text=San+Andreas', 
-    background: 'https://placehold.co/1920x1080/32CD32/000000?text=San+Andreas+Background', 
+    logo: saLogo,
+    banner: saBanner,
+    background: '#0b0f0b', 
     stations: [] 
   },
   gtaiv: { 
     id: 'gtaiv', 
     name: 'Grand Theft Auto IV', 
-    logo: 'https://placehold.co/400x150/696969/ffffff?text=GTA+IV', 
-    background: 'https://placehold.co/1920x1080/696969/000000?text=GTA+IV+Background', 
+    logo: gtaivLogo,
+    banner: gtaivBanner,
+    background: '#0c0c0c', 
     stations: [] 
   },
   gtav: { 
     id: 'gtav', 
     name: 'Grand Theft Auto V', 
-    logo: 'https://placehold.co/400x150/00CED1/ffffff?text=GTA+V', 
-    background: 'https://placehold.co/1920x1080/00CED1/000000?text=GTA+V+Background', 
+    logo: gtavLogo,
+    banner: gtavBanner,
+    background: '#081012', 
     stations: [] 
   },
   gta3: { 
     id: 'gta3', 
     name: 'Grand Theft Auto III', 
-    logo: 'https://placehold.co/400x150/8B0000/ffffff?text=GTA+III', 
-    background: 'https://placehold.co/1920x1080/8B0000/000000?text=GTA+III+Background', 
+    logo: gta3Logo,
+    banner: gta3Banner,
+    background: '#0d0a0a', 
     stations: [] 
   },
 };
