@@ -77,9 +77,9 @@ export default function App() {
   // Filter stations based on search and genre
   const getFilteredStations = (stations) => {
     return stations.filter(station => {
-      const matchesSearch = station.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           station.genre.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesGenre = selectedGenre === 'all' || station.genre.toLowerCase() === selectedGenre.toLowerCase();
+      const matchesSearch = station.name.toLowerCase().includes(searchQuery.toLowerCase());
+      // Since stations don't have genre property yet, we'll just filter by name for now
+      const matchesGenre = selectedGenre === 'all';
       return matchesSearch && matchesGenre;
     });
   };
