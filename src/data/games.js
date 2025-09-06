@@ -1,12 +1,18 @@
 // GTA Radio Games Data
-// TODO: Replace placeholder URLs with your actual asset URLs.
+// Assets are organized by game for better maintainability
+
+import vcsLogo from '../assets/games/vcs/vcs-logo.png';
+import vcsBanner from '../assets/games/vcs/vcs-banner.png';
+import vcsBackground from '../assets/games/vcs/vcs-bg.png';
 
 export const games = {
   vcs: {
     id: 'vcs',
     name: 'Grand Theft Auto - Vice City Stories',
-    logo: 'https://placehold.co/400x150/000000/ffffff?text=VCS+Logo',
+    logo: vcsLogo,
+    banner: vcsBanner,
     background: 'https://placehold.co/1920x1080/000000/ffffff?text=VCS+Background',
+
     stations: [
       {
         id: 'vcs-flash',
