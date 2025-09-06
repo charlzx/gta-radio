@@ -355,85 +355,87 @@ export default function App() {
         </main>
       </div>
       
-      {/* Focus Mode Overlay */}
+      {/* Focus Mode Overlay - Overhauled UI */}
       {isFocusMode && currentStation && (
-        <div className="fixed inset-0 bg-black/95 backdrop-blur-3xl z-50 flex flex-col items-center justify-center p-8 animate-fade-in-up">
-           {/* Close button */}
-           <button 
-             onClick={() => setIsFocusMode(false)} 
-             className="absolute top-8 right-8 p-4 bg-white/10 backdrop-blur-xl rounded-full hover:bg-white/20 transition-all duration-300 hover:scale-105 border border-white/20"
-           >
-             <FaCompress className="w-6 h-6" />
-           </button>
-           
-           {/* Content container */}
-           <div className="flex flex-col items-center max-w-2xl w-full">
-             {/* Live indicator */}
-             <LiveIndicator className="mb-8 shadow-lg" />
-             
-             {/* Album art with enhanced styling */}
-             <div className="relative mb-8">
-               <div className="absolute inset-0 bg-pink-500/20 rounded-3xl blur-3xl transform scale-110"></div>
-               <img 
-                 src={currentStation.logo} 
-                 alt="" 
-                 draggable="false" 
-                 className="relative w-80 h-80 rounded-3xl shadow-2xl border border-white/10 object-cover"
-               />
-             </div>
-             
-             {/* Track info */}
-             <div className="text-center mb-8 px-4">
-               <h1 className="text-4xl md:text-5xl font-bold text-white text-shadow-glow mb-3 leading-tight">
-                 {nowPlaying.title}
-               </h1>
-               <p className="text-2xl md:text-3xl text-pink-400 font-medium">
-                 {nowPlaying.artist}
-               </p>
-               <p className="text-lg text-gray-400 mt-2 font-medium">
-                 {currentStation.name}
-               </p>
-             </div>
-             
-             {/* Enhanced progress section */}
-             <div className="w-full max-w-lg mb-10">
-               <div className="flex justify-between text-sm font-medium text-gray-300 mb-3">
-                 <span className="bg-black/30 px-3 py-1 rounded-full">{formatTime(currentTime)}</span>
-                 <span className="bg-black/30 px-3 py-1 rounded-full">{formatTime(duration)}</span>
-               </div>
-               <div className="relative">
-                 <div className="w-full bg-white/10 rounded-full h-2 backdrop-blur-sm border border-white/10">
-                   <div 
-                     className="bg-gradient-to-r from-pink-500 to-pink-400 h-2 rounded-full transition-all duration-300 shadow-lg relative" 
-                     style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
-                   >
-                     <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg border-2 border-pink-500"></div>
-                   </div>
-                 </div>
-               </div>
-             </div>
-             
-             {/* Enhanced control buttons */}
-             <div className="flex items-center space-x-8">
-               <button 
-                 onClick={goToPreviousTrack}
-                 className="p-4 bg-white/10 backdrop-blur-xl rounded-full hover:bg-white/20 transition-all duration-300 hover:scale-110 border border-white/20 shadow-lg"
-               >
-                 <FaStepBackward className="w-6 h-6" />
-               </button>
-               
-               <div className="transform hover:scale-105 transition-transform duration-300">
-                 <PlayPauseButton isPlaying={isPlaying} onToggle={togglePlayPause} size="lg"/>
-               </div>
-               
-               <button 
-                 onClick={goToNextTrack}
-                 className="p-4 bg-white/10 backdrop-blur-xl rounded-full hover:bg-white/20 transition-all duration-300 hover:scale-110 border border-white/20 shadow-lg"
-               >
-                 <FaStepForward className="w-6 h-6" />
-               </button>
-             </div>
-           </div>
+        <div 
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 sm:p-8 animate-fade-in-up"
+        >
+          {/* Dynamic Blurred Background */}
+          <div 
+            className="absolute inset-0 w-full h-full bg-cover bg-center transition-all duration-500 scale-110 blur-3xl opacity-40"
+            style={{ backgroundImage: `url(${currentStation.logo})` }} 
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-black/80 via-black/90 to-black" />
+
+          {/* Close Button */}
+          <button 
+            onClick={() => setIsFocusMode(false)} 
+            className="absolute top-6 right-6 text-white/70 hover:text-white hover:scale-110 transition-all z-10"
+          >
+            <FaCompress className="w-7 h-7" />
+          </button>
+
+          {/* Main Content Grid */}
+          <div className="relative w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            
+            {/* Left Side: Album Art */}
+            <div className="flex justify-center lg:justify-end">
+              <div className="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96">
+                <div className="absolute -inset-4 bg-pink-500/20 rounded-3xl blur-3xl animate-pulse-slow" />
+                <img 
+                  src={currentStation.logo} 
+                  alt={currentStation.name}
+                  draggable="false" 
+                  className="relative w-full h-full rounded-3xl shadow-2xl border-2 border-white/10 object-cover"
+                />
+              </div>
+            </div>
+
+            {/* Right Side: Player UI */}
+            <div className="flex flex-col text-center lg:text-left items-center lg:items-start">
+              <LiveIndicator className="mb-4" />
+              
+              <h1 className="text-4xl sm:text-5xl font-bold text-white leading-tight">
+                {nowPlaying.title}
+              </h1>
+              <p className="text-2xl sm:text-3xl text-pink-400 font-medium mt-2">
+                {nowPlaying.artist}
+              </p>
+              <p className="text-lg text-gray-400 mt-4 font-medium">
+                on <span className="font-bold text-gray-300">{currentStation.name}</span>
+              </p>
+              <p className="text-sm text-gray-500 mt-1">
+                from {currentGame.name}
+              </p>
+
+              {/* Progress Bar */}
+              <div className="w-full max-w-lg mt-8">
+                <div className="w-full bg-white/10 rounded-full h-2 group">
+                  <div 
+                    className="bg-gradient-to-r from-pink-500 to-pink-400 h-2 rounded-full relative" 
+                    style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
+                  >
+                    <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </div>
+                <div className="flex justify-between text-xs font-medium text-gray-400 mt-2">
+                  <span>{formatTime(currentTime)}</span>
+                  <span>{formatTime(duration)}</span>
+                </div>
+              </div>
+
+              {/* Controls */}
+              <div className="flex items-center space-x-6 mt-8">
+                <button className="text-white/70 hover:text-white transition-colors">
+                  <FaStepBackward className="w-7 h-7" onClick={goToPreviousTrack} />
+                </button>
+                <PlayPauseButton isPlaying={isPlaying} onToggle={togglePlayPause} size="lg"/>
+                <button className="text-white/70 hover:text-white transition-colors">
+                  <FaStepForward className="w-7 h-7" onClick={goToNextTrack} />
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
       
@@ -450,6 +452,11 @@ export default function App() {
         }
         .animate-blink { animation: blink 1.2s linear infinite; }
         @keyframes blink { 50% { opacity: 0.2; } }
+        .animate-pulse-slow { animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: .5; }
+        }
 
         /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar {
