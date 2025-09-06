@@ -5,7 +5,7 @@ const StationCard = ({ station, onSelect, isSelected, isPlaying }) => (
   <div 
     className={`relative rounded-lg overflow-hidden transition-all duration-300 ease-in-out group cursor-pointer
       ${isSelected ? 'ring-2 ring-pink-500' : ''}
-      ${!station.audioUrl ? 'opacity-60' : 'hover:scale-105'}`} 
+      ${!station.audioUrl ? 'opacity-60' : 'hover:scale-102'}`} 
     onClick={() => station.audioUrl && onSelect(station)}
   >
     <img 
