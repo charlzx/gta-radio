@@ -20,18 +20,16 @@ const StationListItem = ({
 
   return (
     <div 
-      className={`group flex items-center gap-4 rounded-lg transition-all duration-200 cursor-pointer hover:bg-white/5 
+      className={`group flex items-center gap-3 rounded-lg transition-all duration-200 cursor-pointer hover:bg-white/5 
         ${isSelected ? 'bg-pink-500/10 border border-pink-500/20' : ''}
         ${!station.audioUrl ? 'opacity-60' : ''}
-        ${isMobile ? 'p-4 min-h-[56px] border border-white/5 bg-white/5' : 'p-3'}`}
+        ${isMobile ? 'p-2 min-h-[56px] border border-white/5 bg-white/5' : 'p-3'}`}
       onClick={() => station.audioUrl && onSelect(station)}
     >
       {/* Track Number / Play Button */}
-      <div className={`flex items-center justify-center text-sm text-gray-400 group-hover:text-white ${isMobile ? 'w-10 h-10' : 'w-8 h-8'}`}>
-        {isSelected && isPlaying ? (
-          <FaPause className={`text-pink-400 ${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} />
-        ) : isSelected ? (
-          <FaPlay className={`text-pink-400 ${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} />
+      <div className={`flex items-center justify-center text-sm text-gray-400 group-hover:text-white pl-1 ${isMobile ? 'h-10' : 'w-8 h-8'}`}>
+        {isSelected ? (
+          <span className={`text-pink-400 font-medium ${isMobile ? 'text-base' : 'text-sm'}`}>{index + 1}</span>
         ) : (
           <span className="group-hover:hidden">{index + 1}</span>
         )}
@@ -76,12 +74,12 @@ const StationListItem = ({
           )}
         </button>
 
-        {!station.audioUrl ? (
-          <span className={`bg-gray-700 text-gray-300 rounded ${isMobile ? 'px-3 py-1.5 text-sm' : 'px-2 py-1 text-xs'}`}>Coming Soon</span>
-        ) : isSelected ? (
+        {!isMobile && !station.audioUrl ? (
+          <span className="bg-gray-700 text-gray-300 rounded px-2 py-1 text-xs">Coming Soon</span>
+        ) : !isMobile && isSelected ? (
           <div className="flex items-center gap-1">
-            <div className={`bg-pink-500 rounded-full animate-pulse ${isMobile ? 'w-3 h-3' : 'w-2 h-2'}`}></div>
-            <span className={`text-pink-400 font-medium ${isMobile ? 'text-sm' : 'text-xs'}`}>LIVE</span>
+            <div className="bg-pink-500 rounded-full animate-pulse w-2 h-2"></div>
+            <span className="text-pink-400 font-medium text-xs">LIVE</span>
           </div>
         ) : !isMobile ? (
           <div className="flex items-center gap-2">

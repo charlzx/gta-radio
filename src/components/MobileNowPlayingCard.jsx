@@ -45,7 +45,7 @@ const MobileNowPlayingCard = ({
           <div className="text-lg font-bold text-white">Now Playing</div>
           <button
             onClick={onCollapse}
-            className="p-3 rounded-full bg-white/20 hover:bg-white/30 text-white shadow-md transition-colors"
+            className="p-3 rounded-full bg-white/0 hover:bg-white/30 text-white shadow-md transition-colors"
             aria-label="Collapse player"
           >
             <FaChevronDown className="w-6 h-6" />
@@ -60,13 +60,13 @@ const MobileNowPlayingCard = ({
   }
 
   return (
-    <div className="bg-black/95 backdrop-blur-xl border-t border-white/20 p-4 pb-safe max-h-[80vh] overflow-y-auto">
+    <div className="bg-black/95 backdrop-blur-xl border-t border-white/20 p-4 h-full overflow-y-auto">
       {/* Header with collapse button (high-contrast, larger hit area) */}
       <div className="flex items-center justify-between mb-4">
         <div className="text-lg font-bold text-white">Now Playing</div>
         <button
           onClick={onCollapse}
-          className="p-3 rounded-full bg-white/20 hover:bg-white/30 text-white shadow-md transition-colors"
+          className="p-3 rounded-full bg-white/0 hover:bg-white/30 text-white shadow-md transition-colors"
           aria-label="Collapse player"
         >
           <FaChevronDown className="w-6 h-6" />
@@ -74,11 +74,11 @@ const MobileNowPlayingCard = ({
       </div>
 
       {/* Artwork above LIVE tag and titles */}
-      <div className="flex flex-col items-center text-center gap-4 mb-6">
+      <div className="mt-10 flex flex-col items-center text-center gap-4 mb-6">
         <img
           src={currentStation.logo || currentGame.logo}
           alt={currentStation.name}
-          className="w-36 h-36 rounded-xl object-cover bg-black/30 border border-white/10"
+          className="w-44 h-44 rounded-xl object-cover bg-black/30 border border-white/10"
           draggable="false"
         />
         <div className="flex items-center gap-2">
@@ -129,7 +129,7 @@ const MobileNowPlayingCard = ({
       </div>
 
       {/* Volume Control */}
-      <div className="mb-6">
+      <div className="mb-8">
         <div className="flex items-center justify-between mb-3">
           <div className="text-sm text-gray-300 font-medium">Volume</div>
           <div className="text-xs text-gray-400">
@@ -145,7 +145,7 @@ const MobileNowPlayingCard = ({
       </div>
 
       {/* Up Next */}
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg p-4">
+      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg p-4 mb-4">
         <div className="text-sm font-semibold text-white mb-2">Up Next</div>
         {nextTrack ? (
           <div>

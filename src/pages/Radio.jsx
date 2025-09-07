@@ -435,81 +435,59 @@ export default function Radio() {
                 <div>
                   <h2 className="text-lg font-bold text-white">{selectedGameView.name}</h2>
                   <p className="text-gray-400 mt-0.5 text-xs">
-                    {getFilteredStations(selectedGameView.stations).length} of {selectedGameView.stations.length} stations
+                    {selectedGameView.stations.length} stations
                   </p>
                 </div>
               </header>
-
-              {/* Search Filter - Pinned at top on mobile */}
-              <div className={`sticky top-0 z-10 bg-black/90 backdrop-blur-md ${isMobile ? 'px-4 py-3 -mx-4' : 'mb-4'}`}>
-                <SearchFilter
-                  className="mb-0"
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  selectedGenre={selectedGenre}
-                  onGenreChange={setSelectedGenre}
-                  placeholder={`Search ${selectedGameView.name} stations...`}
-                />
-              </div>
               
               {selectedGameView.stations.length > 0 ? (
-                (() => {
-                  const filteredStations = getFilteredStations(selectedGameView.stations);
-                  return filteredStations.length > 0 ? (
-                    <div>
-                      {/* Mobile: Single column, full-width list with 16px horizontal padding */}
-                      {isMobile ? (
-                        <div className="px-4 space-y-3">
-                          {filteredStations.map((station, index) => (
-                            <StationListItem
-                              key={station.id}
-                              station={station}
-                              index={index}
-                              onSelect={handleStationSelect}
-                              isSelected={currentStation?.id === station.id}
-                              isPlaying={isPlaying}
-                              isFavorite={favorites.has(station.id)}
-                              onToggleFavorite={handleToggleFavorite}
-                              isMobile={true}
-                            />
-                          ))}
-                        </div>
-                      ) : (
-                        /* Desktop: Table-style layout */
-                        <div className="space-y-1">
-                          {/* List Header */}
-                          <div className="flex items-center gap-4 px-3 py-2 text-sm text-gray-400 border-b border-white/5 mb-2">
-                            <div className="w-8 text-center">#</div>
-                            <div className="w-12"></div>
-                            <div className="flex-1">Station</div>
-                            <div className="w-16 text-center">♡</div>
-                            <div className="w-20 text-center">Duration</div>
-                          </div>
-                          
-                          {/* Station List */}
-                          {filteredStations.map((station, index) => (
-                            <StationListItem
-                              key={station.id}
-                              station={station}
-                              index={index}
-                              onSelect={handleStationSelect}
-                              isSelected={currentStation?.id === station.id}
-                              isPlaying={isPlaying}
-                              isFavorite={favorites.has(station.id)}
-                              onToggleFavorite={handleToggleFavorite}
-                              isMobile={false}
-                            />
-                          ))}
-                        </div>
-                      )}
+                <div>
+                  {/* Mobile: Single column, full-width list with 16px horizontal padding */}
+                  {isMobile ? (
+                    <div className="space-y-3">
+                      {selectedGameView.stations.map((station, index) => (
+                        <StationListItem
+                          key={station.id}
+                          station={station}
+                          index={index}
+                          onSelect={handleStationSelect}
+                          isSelected={currentStation?.id === station.id}
+                          isPlaying={isPlaying}
+                          isFavorite={favorites.has(station.id)}
+                          onToggleFavorite={handleToggleFavorite}
+                          isMobile={true}
+                        />
+                      ))}
                     </div>
                   ) : (
-                    <div className="text-center py-16">
-                      <h3 className="text-2xl font-bold text-gray-400 mb-2">No stations found</h3>
-                      <p className="text-gray-500">Try adjusting your search or filter criteria.</p>
+                    /* Desktop: Table-style layout */
+                    <div className="space-y-1">
+                      {/* List Header */}
+                      <div className="flex items-center gap-4 px-3 py-2 text-sm text-gray-400 border-b border-white/5 mb-2">
+                        <div className="w-8 text-center">#</div>
+                        <div className="w-12"></div>
+                        <div className="flex-1">Station</div>
+                        <div className="w-16 text-center">♡</div>
+                        <div className="w-20 text-center">Duration</div>
+                      </div>
+                      
+                      {/* Station List */}
+                      {selectedGameView.stations.map((station, index) => (
+                        <StationListItem
+                          key={station.id}
+                          station={station}
+                          index={index}
+                          onSelect={handleStationSelect}
+                          isSelected={currentStation?.id === station.id}
+                          isPlaying={isPlaying}
+                          isFavorite={favorites.has(station.id)}
+                          onToggleFavorite={handleToggleFavorite}
+                          isMobile={false}
+                        />
+                      ))}
                     </div>
-                  );
-                })()
+                  )}
+                </div>
               ) : (
                 <div className="text-center py-16">
                   <h3 className="text-2xl font-bold text-gray-400 mb-2">Coming Soon</h3>
@@ -623,15 +601,16 @@ export default function Radio() {
                       <h2 className="text-xl font-bold">Recently Played</h2>
                     </div>
                     {isMobile ? (
-                      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                      <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-hide">
                         {recentlyPlayed.map(station => (
-                          <div key={station.id} className="min-w-[120px]">
+                          <div key={station.id} className="min-w-[104px]">
                             <StationCard 
                               station={station}
                               onSelect={handleStationSelect}
                               isSelected={currentStation?.id === station.id}
                               isPlaying={isPlaying}
                               size="compact"
+                              compactMinWidth={104}
                             />
                           </div>
                         ))}

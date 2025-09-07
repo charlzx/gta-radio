@@ -1,6 +1,8 @@
 import React from 'react';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const GameCard = ({ game, isDisabled, onSelect, isSelected }) => {
+  const isMobile = useIsMobile();
   // Theme colors for each GTA game
   const getGameThemeColor = (gameId) => {
     const themes = {
@@ -18,9 +20,10 @@ const GameCard = ({ game, isDisabled, onSelect, isSelected }) => {
   
   return (
     <div 
-      className={`relative rounded-lg aspect-square flex items-center justify-center p-4 transition-all duration-300 cursor-pointer overflow-hidden border border-white/10 ${themeColor}
+      className={`relative rounded-lg aspect-square flex items-center justify-center transition-all duration-300 cursor-pointer overflow-hidden border border-white/10 ${themeColor}
         ${isSelected ? 'ring-2 ring-pink-500/50 border-pink-500/30' : 'hover:border-white/20'} 
-        ${isDisabled ? 'hover:scale-[1.02]' : 'hover:scale-[1.02]'}`}
+        ${isDisabled ? 'hover:scale-[1.02]' : 'hover:scale-[1.02]'}
+        ${isMobile ? 'p-2' : 'p-4'}`}
       onClick={() => !isDisabled && onSelect(game)}
     >
     {/* Game logo */}
@@ -33,7 +36,8 @@ const GameCard = ({ game, isDisabled, onSelect, isSelected }) => {
       />
     ) : (
       /* Fallback for games without logo */
-      <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold
+      <div className={`rounded-full flex items-center justify-center font-bold
+        ${isMobile ? 'w-12 h-12 text-lg' : 'w-16 h-16 text-2xl'}
         ${isSelected ? 'bg-pink-500/30 text-pink-300' : 
           isDisabled ? 'bg-white/10 text-gray-400' : 'bg-white/20 text-white'}`}>
         {game.name.split(' ').pop().charAt(0)}
@@ -42,16 +46,16 @@ const GameCard = ({ game, isDisabled, onSelect, isSelected }) => {
     
     {/* Status badges */}
     {isDisabled && (
-      <div className="absolute top-2 right-2 text-xs bg-gray-700/90 backdrop-blur-sm text-gray-300 px-2 py-1 rounded-full z-10">
+      <div className={`absolute top-2 right-2 text-xs bg-gray-700/90 backdrop-blur-sm text-gray-300 px-2 py-1 rounded-full z-10 ${isMobile ? 'text-[10px] px-1.5 py-0.5' : ''}`}>
         SOON
       </div>
     )}
     {!isDisabled && !isSelected && (
-      <div className="absolute top-2 right-2 text-xs bg-pink-600/90 backdrop-blur-sm text-white px-2 py-1 rounded-full z-10">
+      <div className={`absolute top-2 right-2 text-xs bg-pink-600/90 backdrop-blur-sm text-white px-2 py-1 rounded-full z-10 ${isMobile ? 'text-[10px] px-1.5 py-0.5' : ''}`}>
         ACTIVE
       </div>
     )}
-    {isSelected && (
+    {isSelected && !isMobile && (
       <div className="absolute top-2 right-2 text-xs bg-pink-500/90 backdrop-blur-sm text-white px-2 py-1 rounded-full z-10">
         SELECTED
       </div>
