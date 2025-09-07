@@ -20,26 +20,26 @@ const StationListItem = ({
 
   return (
     <div 
-      className={`group flex items-center gap-3 rounded-lg transition-all duration-200 cursor-pointer hover:bg-white/5 
-        ${isSelected ? 'bg-pink-500/10 border border-pink-500/20' : ''}
+      className={`group flex items-center gap-3 rounded-lg transition-all duration-200 cursor-pointer hover:bg-white/5 relative
+        ${isSelected ? 'bg-pink-500/10' : ''}
         ${!station.audioUrl ? 'opacity-60' : ''}
-        ${isMobile ? 'p-2 min-h-[56px] border border-white/5 bg-white/5' : 'p-3'}`}
+        ${isMobile ? 'p-2 xs:p-1.5 min-h-[56px] xs:min-h-[48px] border border-white/5 bg-white/5' : 'p-3'}`}
       onClick={() => station.audioUrl && onSelect(station)}
     >
       {/* Track Number / Play Button */}
-      <div className={`flex items-center justify-center text-sm text-gray-400 group-hover:text-white pl-1 ${isMobile ? 'h-10' : 'w-8 h-8'}`}>
+      <div className={`flex items-center justify-center text-sm text-gray-400 group-hover:text-white pl-1 ${isMobile ? 'h-10 xs:h-8' : 'w-8 h-8'}`}>
         {isSelected ? (
-          <span className={`text-pink-400 font-medium ${isMobile ? 'text-base' : 'text-sm'}`}>{index + 1}</span>
+          <span className={`text-pink-400 font-medium ${isMobile ? 'text-base xs:text-sm' : 'text-sm'}`}>{index + 1}</span>
         ) : (
           <span className="group-hover:hidden">{index + 1}</span>
         )}
         {!isSelected && station.audioUrl && (
-          <FaPlay className={`hidden group-hover:block ${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} />
+          <FaPlay className={`hidden group-hover:block ${isMobile ? 'w-4 h-4 xs:w-3 xs:h-3' : 'w-4 h-4'}`} />
         )}
       </div>
 
       {/* Station Logo */}
-      <div className={`rounded-lg overflow-hidden flex-shrink-0 ${isMobile ? 'w-14 h-14' : 'w-12 h-12'}`}>
+      <div className={`rounded-lg overflow-hidden flex-shrink-0 ${isMobile ? 'w-12 h-12 xs:w-10 xs:h-10' : 'w-12 h-12'}`}>
         <img 
           src={station.logo} 
           alt={station.name} 
@@ -49,28 +49,28 @@ const StationListItem = ({
 
       {/* Station Info */}
       <div className="flex-1 min-w-0">
-        <h3 className={`font-medium truncate ${isSelected ? 'text-pink-400' : 'text-white group-hover:text-white'} ${isMobile ? 'text-base' : 'text-sm'}`}>
+        <h3 className={`font-medium truncate ${isSelected ? 'text-pink-400' : 'text-white group-hover:text-white'} ${isMobile ? 'text-base xs:text-sm' : 'text-sm'}`}>
           {station.name}
         </h3>
-        <p className={`text-gray-400 truncate ${isMobile ? 'text-sm' : 'text-xs'}`}>
+        <p className={`text-gray-400 truncate ${isMobile ? 'text-sm xs:text-xs' : 'text-xs'}`}>
           {station.tracklist?.[0]?.artist || 'Radio Station'}
         </p>
       </div>
 
       {/* Status / Duration */}
-      <div className={`flex items-center gap-4 text-gray-400 ${isMobile ? 'text-base' : 'text-sm'}`}>
+      <div className={`flex items-center gap-4 text-gray-400 ${isMobile ? 'text-base xs:text-sm' : 'text-sm'}`}>
         {/* Favorite Button */}
         <button
           onClick={(e) => {
             e.stopPropagation();
             onToggleFavorite(station.id);
           }}
-          className={`hover:text-pink-400 transition-colors ${isMobile ? 'p-2 min-w-[44px] min-h-[44px] flex items-center justify-center' : 'p-1'}`}
+          className={`hover:text-pink-400 transition-colors ${isMobile ? 'p-2 xs:p-1.5 min-w-[44px] xs:min-w-[36px] min-h-[44px] xs:min-h-[36px] flex items-center justify-center' : 'p-1'}`}
         >
           {isFavorite ? (
-            <FaHeart className={`text-pink-400 ${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} />
+            <FaHeart className={`text-pink-400 ${isMobile ? 'w-4 h-4 xs:w-3 xs:h-3' : 'w-4 h-4'}`} />
           ) : (
-            <FaRegHeart className={`hover:text-pink-400 ${isMobile ? 'w-5 h-5' : 'w-4 h-4'}`} />
+            <FaRegHeart className={`hover:text-pink-400 ${isMobile ? 'w-4 h-4 xs:w-3 xs:h-3' : 'w-4 h-4'}`} />
           )}
         </button>
 

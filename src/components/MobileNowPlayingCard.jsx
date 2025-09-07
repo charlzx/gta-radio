@@ -60,7 +60,7 @@ const MobileNowPlayingCard = ({
   }
 
   return (
-    <div className="bg-black/95 backdrop-blur-xl border-t border-white/20 p-4 h-full overflow-y-auto">
+    <div className="bg-black/95 backdrop-blur-xl border-t border-white/20 p-4 h-full overflow-y-auto scrollbar-hide">
       {/* Header with collapse button (high-contrast, larger hit area) */}
       <div className="flex items-center justify-between mb-4">
         <div className="text-lg font-bold text-white">Now Playing</div>
@@ -74,7 +74,7 @@ const MobileNowPlayingCard = ({
       </div>
 
       {/* Artwork above LIVE tag and titles */}
-      <div className="mt-10 flex flex-col items-center text-center gap-4 mb-6">
+      <div className="mt-20 flex flex-col items-center text-center gap-4 mb-6">
         <img
           src={currentStation.logo || currentGame.logo}
           alt={currentStation.name}
@@ -130,8 +130,8 @@ const MobileNowPlayingCard = ({
 
       {/* Volume Control */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-sm text-gray-300 font-medium">Volume</div>
+        <div className="flex items-center mb-3">
+          <div className="text-sm text-gray-300 font-medium mr-2">Volume</div>
           <div className="text-xs text-gray-400">
             {isMuted ? 'Muted' : `${Math.round(volume * 100)}%`}
           </div>

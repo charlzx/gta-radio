@@ -1,1 +1,38 @@
 @import "tailwindcss";
+@config "../tailwind.config.js";
+
+@media (max-width: 768px) {
+    button, [role="button"] {
+        min-height: 0px !important;
+        min-width: 0px !important;
+        margin-right: 5px;
+    }
+}
+
+/* Custom animations */
+@keyframes subtle-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.animate-subtle-blink {
+  animation: subtle-blink 2s ease-in-out infinite;
+}
+
+/* Hide scrollbars */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
+/* Hide horizontal scrollbar globally */
+html {
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+}

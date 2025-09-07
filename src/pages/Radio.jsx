@@ -386,7 +386,7 @@ export default function Radio() {
         
         {/* Left Panel: Now Playing - Hidden on mobile */}
         {!isMobile && (
-          <aside className="md:col-span-1 lg:col-span-1 md:block overflow-y-auto custom-scrollbar">
+          <aside className={`md:col-span-1 lg:col-span-1 md:block overflow-y-auto ${isMobile ? 'scrollbar-hide' : 'custom-scrollbar'}`}>
             <NowPlayingCard
               currentStation={currentStation}
               currentGame={currentGame}
@@ -419,15 +419,15 @@ export default function Radio() {
         )}
 
         {/* Right Panel: Main Content */}
-        <main ref={mainRef} className={`${isMobile ? 'w-full pb-safe' : 'md:col-span-2 lg:col-span-3'} bg-black/30 backdrop-blur-lg border border-white/5 rounded-lg overflow-y-auto custom-scrollbar min-h-0`}>
-          <div className="p-4">
+        <main ref={mainRef} className={`${isMobile ? 'w-full pb-safe' : 'md:col-span-2 lg:col-span-3'} bg-black/30 backdrop-blur-lg rounded-lg overflow-y-auto ${isMobile ? 'scrollbar-hide' : 'custom-scrollbar'} min-h-0 shadow-inner shadow-white/5`}>
+          <div className="p-0 sm:p-4">
           {selectedGameView ? (
             // Single Game View - Mobile-optimized List
             <>
-              <header className={`flex items-center gap-3 mb-4 ${isMobile ? 'px-4' : ''}`}>
+              <header className={`flex items-center gap-3 mb-4 ${isMobile ? 'px-0' : ''}`}>
                 <button 
                   onClick={() => setSelectedGameView(null)}
-                  className="p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-all duration-200 border border-white/10 hover:border-white/20 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                  className="p-0 bg-transparent hover:bg-white/20 rounded-full transition-all duration-200 border-0 sm:bg-white/10 sm:border sm:border-white/10 hover:border-white/20 min-w-[44px] min-h-[44px] flex items-center justify-center"
                   aria-label="Back"
                 >
                   <FaArrowLeft className="w-4 h-4" />
@@ -499,49 +499,25 @@ export default function Radio() {
             // All Games View
             <>
               <div className="sticky top-0 bg-black/90 backdrop-blur-md border-b border-white/5 z-20 -mx-4 px-4 py-3 mb-4">
-                <h2 className="text-3xl font-extrabold text-white">GTA Radio Stations</h2>
-                <p className="text-gray-400 mt-0.5">Live, synchronized radio from across the series.</p>
+                <h2 className="text-3xl sm:text-2xl xs:text-xl font-extrabold text-white">GTA Radio Stations</h2>
+                <p className="text-gray-400 sm:text-sm xs:text-xs mt-0.5">Live, synchronized radio from across the series.</p>
               </div>
 
               <section className="mt-6">
-                <h2 className="text-xl font-bold mb-3">Choose Your Game</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                  <GameCard 
-                    game={gameData.vcs} 
-                    isDisabled={false} 
-                    onSelect={handleGameSelect}
-                    isSelected={currentGame.id === gameData.vcs.id}
-                  />
-                  <GameCard 
-                    game={gameData.vc} 
-                    isDisabled={true} 
-                    onSelect={handleGameSelect}
-                    isSelected={false}
-                  />
-                  <GameCard 
-                    game={gameData.sa} 
-                    isDisabled={true} 
-                    onSelect={handleGameSelect}
-                    isSelected={false}
-                  />
-                  <GameCard 
-                    game={gameData.gtaiv} 
-                    isDisabled={true} 
-                    onSelect={handleGameSelect}
-                    isSelected={false}
-                  />
-                  <GameCard 
-                    game={gameData.gtav} 
-                    isDisabled={true} 
-                    onSelect={handleGameSelect}
-                    isSelected={false}
-                  />
-                  <GameCard 
-                    game={gameData.gta3} 
-                    isDisabled={true} 
-                    onSelect={handleGameSelect}
-                    isSelected={false}
-                  />
+                <h2 className="text-xl sm:text-lg xs:text-base font-bold mb-3">Choose Your Game</h2>
+                <div className={isMobile 
+                  ? "flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4" 
+                  : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
+                }>
+                  {Object.values(gameData).map(game => (
+                    <GameCard 
+                      key={game.id}
+                      game={game} 
+                      isDisabled={game.id !== 'vcs'} // Only VCS is active for now
+                      onSelect={handleGameSelect}
+                      isSelected={currentGame.id === game.id && !selectedGameView}
+                    />
+                  ))}
                 </div>
               </section>
 
