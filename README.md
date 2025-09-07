@@ -29,7 +29,9 @@ A radio streaming app that recreates the authentic GTA radio experience with rea
 - **🎨 Glassmorphism UI** - Modern frosted glass design with smooth animations and enhanced overlays
 - **🎮 Game Navigation** - Browse between different GTA games with banner backgrounds and smart fallbacks
 - **📋 Spotify-style Lists** - Familiar interface for browsing stations
-- **🖼️ Banner Integration** - Game cards use actual banner images with dark overlays for better text visibility
+- **🖼️ Banner Integration** - “Choose your era” cards now use game banners as full background images with subtle overlays
+- **🟪 Particle Backdrop** - Subtle, animated particles with parallax for a living dark background (respects reduced motion)
+- **📱 Mobile Polish** - Tighter section spacing on phones, responsive grids, improved footer layout
 
 ### 🏗️ **Technical Excellence**
 - **� Modular Architecture** - Clean component separation and reusability
@@ -117,11 +119,11 @@ gta-radio/
 │   │   │   └── gtav/    # GTA V assets (coming soon)
 │   │   └── react.svg    # React logo
 │   ├── components/      # Modular React components
-│   │   ├── GameCard.jsx           # Game selection cards with banner support
+│   │   ├── GameCard.jsx           # Game selection cards (square logo in Radio, banner background in Home)
 │   │   ├── StationCard.jsx        # Station display cards
 │   │   ├── StationListItem.jsx    # Spotify-style station rows
 │   │   ├── NowPlayingCard.jsx     # Sidebar player interface
-│   │   ├── FocusMode.jsx          # Fullscreen player
+│   │   ├── FocusMode.jsx          # Fullscreen player (modern digital car radio UI, solid background)
 │   │   ├── VolumeControl.jsx      # Volume slider and mute
 │   │   ├── SearchFilter.jsx       # Real-time search and filtering
 │   │   ├── RecentlyPlayedCard.jsx # Recently played stations
@@ -273,6 +275,19 @@ npm run preview  # Preview production build
 - Grand Theft Auto: San Andreas  
 - Grand Theft Auto IV
 - Grand Theft Auto V
+
+## 🚧 Recent Updates
+
+- Homepage
+  - Animated particle background with slow parallax drift
+  - “Choose your era” uses game banners as full card backgrounds with overlays
+  - Section dividers and tighter mobile spacing
+  - Live Now: “Open full player” becomes a prominent button below 500px
+  - Footer: “Built with” on its own line on mobile; chips wrap nicely
+  - Tuner panel: optimized for small screens (padding/height/typography)
+- Radio
+  - Game cards switched to square logo tiles with theme colors
+  - Focus Mode background made fully opaque
 
 ## 🚧 Roadmap
 
