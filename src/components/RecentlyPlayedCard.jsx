@@ -7,7 +7,7 @@ const RecentlyPlayedCard = ({ recentlyPlayed, onStationSelect }) => {
   }
 
   return (
-    <div className="bg-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/20 mb-6">
+    <div className="bg-white/10 backdrop-blur-xl rounded-xl p-4 border border-white/5 mb-6">
       <div className="flex items-center gap-2 mb-3">
         <FaClock className="w-4 h-4 text-gray-400" />
         <h3 className="text-white font-bold">Recently Played</h3>

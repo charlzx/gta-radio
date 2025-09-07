@@ -3,9 +3,9 @@ import { FaPlay, FaPause } from 'react-icons/fa';
 
 const StationCard = ({ station, onSelect, isSelected, isPlaying }) => (
   <div 
-    className={`relative rounded-lg overflow-hidden transition-all duration-300 ease-in-out group cursor-pointer
-      ${isSelected ? 'ring-2 ring-pink-500' : ''}
-      ${!station.audioUrl ? 'opacity-60' : 'hover:scale-102'}`} 
+    className={`relative rounded-lg overflow-hidden transition-all duration-300 ease-in-out group cursor-pointer border border-white/10
+      ${isSelected ? 'ring-1 ring-pink-500/50 border-pink-500/30' : 'hover:border-white/20'}
+      ${!station.audioUrl ? 'opacity-60' : 'hover:scale-[1.01]'}`} 
     onClick={() => station.audioUrl && onSelect(station)}
   >
     <img 

@@ -2,9 +2,9 @@ import React from 'react';
 
 const GameCard = ({ game, isDisabled, onSelect, isSelected }) => (
   <div 
-    className={`relative rounded-lg h-32 flex items-center justify-center p-4 transition-all duration-300 cursor-pointer overflow-hidden
-      ${isSelected ? 'ring-2 ring-pink-500' : ''} 
-      ${isDisabled ? 'hover:scale-102' : 'hover:scale-102'}`}
+    className={`relative rounded-lg h-28 flex items-center justify-center p-2 transition-all duration-300 cursor-pointer overflow-hidden border border-white/10
+      ${isSelected ? 'ring-1 ring-pink-500/50 border-pink-500/30' : 'hover:border-white/20'} 
+      ${isDisabled ? 'hover:scale-[1.01]' : 'hover:scale-[1.01]'}`}
     onClick={() => !isDisabled && onSelect(game)}
   >
     {/* Banner image with alt text fallback */}
@@ -40,17 +40,17 @@ const GameCard = ({ game, isDisabled, onSelect, isSelected }) => (
     )}
     
     {isDisabled && (
-      <div className="absolute top-3 right-3 text-xs bg-gray-700/90 backdrop-blur-sm text-gray-300 px-2 py-1 rounded-full z-10">
+      <div className="absolute top-2 right-2 text-xs bg-gray-700/90 backdrop-blur-sm text-gray-300 px-1.5 py-0.5 rounded-full z-10">
         SOON
       </div>
     )}
     {!isDisabled && !isSelected && (
-      <div className="absolute top-3 right-3 text-xs bg-pink-600/90 backdrop-blur-sm text-white px-2 py-1 rounded-full z-10">
+      <div className="absolute top-2 right-2 text-xs bg-pink-600/90 backdrop-blur-sm text-white px-1.5 py-0.5 rounded-full z-10">
         ACTIVE
       </div>
     )}
     {isSelected && (
-      <div className="absolute top-3 right-3 text-xs bg-pink-500/90 backdrop-blur-sm text-white px-2 py-1 rounded-full z-10">
+      <div className="absolute top-2 right-2 text-xs bg-pink-500/90 backdrop-blur-sm text-white px-1.5 py-0.5 rounded-full z-10">
         SELECTED
       </div>
     )}

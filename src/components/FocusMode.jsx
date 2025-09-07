@@ -13,8 +13,7 @@ const FocusMode = ({
   onTogglePlayPause,
   onPreviousTrack,
   onNextTrack,
-  onCloseFocusMode,
-  LiveIndicator 
+  onCloseFocusMode
 }) => {
   return (
     <div 
@@ -53,7 +52,6 @@ const FocusMode = ({
 
         {/* Right Side: Player UI */}
         <div className="flex flex-col text-center lg:text-left items-center lg:items-start">
-          <LiveIndicator className="mb-4" />
           
           <h1 className="text-4xl sm:text-5xl font-bold text-white leading-tight">
             {nowPlaying.title}

@@ -9,6 +9,7 @@ import FocusMode from '../components/FocusMode';
 import SearchFilter from '../components/SearchFilter';
 import RecentlyPlayedCard from '../components/RecentlyPlayedCard';
 import MiniPlayer from '../components/MiniPlayer';
+import { useRadioPlayer } from '../hooks/useRadioPlayer';
 
 export default function Radio() {
   const [gameData] = useState(games);
@@ -16,25 +17,31 @@ export default function Radio() {
   const [selectedGameView, setSelectedGameView] = useState(null); // New state for game selection view
   const [currentStation, setCurrentStation] = useState(null);
   const [nowPlaying, setNowPlaying] = useState({ type: '', artist: 'GTA Live Radio', title: 'Select a station to begin' });
-  const [isPlaying, setIsPlaying] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
   // New feature states
-  const [volume, setVolume] = useState(0.8);
-  const [isMuted, setIsMuted] = useState(false);
+  // volume and mute managed by useRadioPlayer hook
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('all');
+  const [sidebarOpen, setSidebarOpen] = useState(false); // mobile sidebar
   const [favorites, setFavorites] = useState(() => {
     const saved = localStorage.getItem('gta-radio-favorites');
     return saved ? new Set(JSON.parse(saved)) : new Set();
   });
   const [recentlyPlayed, setRecentlyPlayed] = useState([]);
   const [showMiniPlayer, setShowMiniPlayer] = useState(false);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
 
-  const audioRef = useRef(null);
-  const radioEpoch = new Date('2024-01-01T00:00:00Z').getTime();
+  const { audioRef, isPlaying, volume, isMuted, setVol, toggleMute, playAtEpoch, pause, setActiveDuration, attachMediaSession } = useRadioPlayer();
+  const mainRef = useRef(null);
+  // Leave single-game view when searching globally
+  useEffect(() => {
+    if (searchQuery && selectedGameView) {
+      setSelectedGameView(null);
+    }
+  }, [searchQuery]);
 
   // Helper function to format time (mm:ss)
   const formatTime = (seconds) => {
@@ -44,19 +51,9 @@ export default function Radio() {
   };
 
   // New feature handlers
-  const handleVolumeChange = (newVolume) => {
-    setVolume(newVolume);
-    if (audioRef.current) {
-      audioRef.current.volume = newVolume;
-    }
-  };
+  const handleVolumeChange = (newVolume) => setVol(newVolume);
 
-  const handleToggleMute = () => {
-    setIsMuted(!isMuted);
-    if (audioRef.current) {
-      audioRef.current.muted = !isMuted;
-    }
-  };
+  const handleToggleMute = () => toggleMute();
 
   const handleToggleFavorite = (stationId) => {
     const newFavorites = new Set(favorites);
@@ -108,14 +105,9 @@ export default function Radio() {
     setSelectedGameView(game);
     setCurrentGame(game);
     // Reset station when switching games
-    if (audioRef.current) audioRef.current.pause();
+  pause();
     setCurrentStation(null);
-    setIsPlaying(false);
     setNowPlaying({ type: '', artist: 'GTA Live Radio', title: `Select a ${game.name} station` });
-  };
-
-  const handleBackToGames = () => {
-    setSelectedGameView(null);
   };
 
   const handleStationSelect = (station) => {
@@ -123,29 +115,23 @@ export default function Radio() {
         togglePlayPause();
         return;
     }
-    if (audioRef.current) audioRef.current.pause();
+    pause();
+    // If station came from a global result with a game reference, switch context
+    if (station.game) {
+      setCurrentGame(station.game);
+    }
     setCurrentStation(station);
     setNowPlaying({ type: 'Info', artist: station.name, title: 'Press Play to Sync' });
     addToRecentlyPlayed(station);
     setTimeout(() => {
-        if(audioRef.current && !isPlaying) {
-            togglePlayPause();
-        }
+      if(audioRef.current) togglePlayPause();
     }, 100);
   };
 
   const togglePlayPause = () => {
     if (!currentStation || !audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      const now = new Date().getTime();
-      const elapsed = now - radioEpoch;
-      const currentPlaybackTimeSeconds = (elapsed % (currentStation.duration * 1000)) / 1000;
-      audioRef.current.currentTime = currentPlaybackTimeSeconds;
-      audioRef.current.play().then(() => setIsPlaying(true)).catch(e => console.error("Audio playback failed:", e));
-    }
+    if (isPlaying) return pause();
+    playAtEpoch(currentStation.duration);
   };
 
   const goToNextTrack = () => {
@@ -182,7 +168,7 @@ export default function Radio() {
   };
   
   useEffect(() => {
-    const audioElement = audioRef.current;
+  const audioElement = audioRef.current;
     const updateNowPlaying = () => {
         if (!audioElement || !currentStation?.tracklist) return;
         setCurrentTime(audioElement.currentTime);
@@ -192,7 +178,8 @@ export default function Radio() {
     
     const updateDuration = () => {
       if (audioElement && currentStation) {
-        setDuration(currentStation.duration);
+    setDuration(currentStation.duration);
+    setActiveDuration(currentStation.duration);
       }
     };
 
@@ -213,25 +200,46 @@ export default function Radio() {
         audioElement.removeEventListener('durationchange', updateDuration);
       }
     };
-  }, [currentStation, nowPlaying.title, volume, isMuted]);
+  }, [currentStation, nowPlaying.title, volume, isMuted, setActiveDuration]);
 
   // Mini player scroll effect
   useEffect(() => {
-    const handleScroll = (e) => {
-      const scrollTop = e.target.scrollTop;
-      if (currentStation && !isFocusMode) {
-        setShowMiniPlayer(scrollTop > 100);
-      } else {
-        setShowMiniPlayer(false);
-      }
+    const el = mainRef.current;
+    if (!el) return undefined;
+    const onScroll = () => {
+      const scrollTop = el.scrollTop;
+      setShowMiniPlayer(!!(currentStation && !isFocusMode && scrollTop > 100));
     };
-
-    const mainElement = document.querySelector('main');
-    if (mainElement) {
-      mainElement.addEventListener('scroll', handleScroll);
-      return () => mainElement.removeEventListener('scroll', handleScroll);
-    }
+    el.addEventListener('scroll', onScroll);
+    return () => el.removeEventListener('scroll', onScroll);
   }, [currentStation, isFocusMode]);
+
+  // Media Session
+  useEffect(() => {
+    attachMediaSession({
+      currentStation,
+      nowPlaying,
+      currentGame,
+      togglePlayPause,
+      prev: () => goToPreviousTrack(),
+      next: () => goToNextTrack(),
+    });
+  }, [attachMediaSession, currentStation, nowPlaying, currentGame]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const onKey = (e) => {
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      if (e.code === 'Space') { e.preventDefault(); togglePlayPause(); }
+      if (e.key === 'm' || e.key === 'M') handleToggleMute();
+      if (e.key === 'k' || e.key === 'K') togglePlayPause();
+      if (e.key === 'j' || e.key === 'J') goToPreviousTrack();
+      if (e.key === 'l' || e.key === 'L') goToNextTrack();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [togglePlayPause]);
 
   // Dynamic title update based on what's playing
   useEffect(() => {
@@ -266,21 +274,100 @@ export default function Radio() {
   }, [currentStation, isPlaying, nowPlaying]);
 
   const LiveIndicator = ({ className = '' }) => isPlaying && (
-    <div className={`flex items-center space-x-2 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${className}`}>
-        <span className="w-2 h-2 bg-white rounded-full animate-blink"></span>
+    <div className={`flex items-center space-x-1.5 bg-red-600 text-white px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${className}`}>
+        <span className="w-1.5 h-1.5 bg-white rounded-full animate-blink"></span>
         <span>LIVE</span>
     </div>
   );
 
   return (
     <>
-      <div className="fixed inset-0 w-full h-full bg-cover bg-center transition-all duration-1000" style={{ backgroundImage: `url(${currentGame.background})`, zIndex: -2 }} />
+      {(() => {
+        const bg = currentGame.background;
+        const isColor = typeof bg === 'string' && bg.startsWith('#');
+        return isColor ? (
+          <div className="fixed inset-0 w-full h-full transition-all duration-1000" style={{ backgroundColor: bg, zIndex: -2 }} />
+        ) : (
+          <div className="fixed inset-0 w-full h-full bg-cover bg-center transition-all duration-1000" style={{ backgroundImage: `url(${bg})`, zIndex: -2 }} />
+        );
+      })()}
       <div className="fixed inset-0 w-full h-full bg-black/80 backdrop-blur-md" style={{ zIndex: -1 }} />
 
-      <div className="h-screen text-white font-sans grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+      {/* Sticky Header with centered search */}
+      <header className="sticky top-0 z-20 bg-gradient-to-b from-black/60 to-black/30 backdrop-blur-xl border-b border-white/5 text-white">
+        <div className="relative px-3 py-2">
+          {/* Centered search bar */}
+          <div className="flex items-center justify-center">
+            <div className="relative w-full max-w-sm">
+              <SearchFilter
+                className="mb-0"
+                searchQuery={searchQuery}
+                onSearchChange={(v) => { setSearchQuery(v); setShowSearchDropdown(true); }}
+                selectedGenre={selectedGenre}
+                onGenreChange={setSelectedGenre}
+                onFocus={() => setShowSearchDropdown(true)}
+                onBlur={() => setTimeout(() => { setShowSearchDropdown(false); setSearchQuery(''); }, 120)}
+                placeholder="Search stations across all games..."
+              />
+              {/* Anchored dropdown */}
+              {showSearchDropdown && searchQuery.trim() && (
+                <div className="absolute left-0 top-full mt-1 w-full bg-black border border-white/5 rounded-lg shadow-2xl p-0 max-h-[50vh] overflow-auto">
+                  {(() => {
+                    const results = Object.values(gameData).flatMap(game =>
+                      game.stations
+                        .filter(st => st.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                        .map(st => ({ ...st, game }))
+                    );
+                    return results.length > 0 ? (
+                      <ul className="divide-y divide-white/5">
+                        {results.slice(0, 20).map(station => (
+                          <li key={`${station.game.id}-${station.id}`}>
+                            <button
+                              type="button"
+                              onClick={() => { handleStationSelect(station); setShowSearchDropdown(false); }}
+                              className="w-full px-2 py-1.5 flex items-center gap-2 hover:bg-gray-800"
+                            >
+                              <img src={station.logo} alt={station.name} className="w-8 h-8 rounded object-cover" />
+                              <div className="flex-1 min-w-0 text-left">
+                                <div className="text-white text-sm font-medium truncate">{station.name}</div>
+                                <div className="text-xs text-gray-400 truncate">{station.game.name}</div>
+                              </div>
+                              {!station.audioUrl ? (
+                                <span className="text-xs px-2 py-1 rounded bg-gray-700 text-gray-200">Coming Soon</span>
+                              ) : (
+                                currentStation?.id === station.id && isPlaying ? (
+                                  <span className="text-xs text-pink-400 font-semibold">LIVE</span>
+                                ) : null
+                              )}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="text-gray-400 text-center py-8">No stations match "{searchQuery}".</div>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Sidebar toggle (mobile, absolute right) */}
+          <button
+            onClick={() => setSidebarOpen((v) => !v)}
+            className="md:hidden absolute right-3 top-1/2 -translate-y-1/2 px-2 py-1 text-sm rounded bg-white/10 border border-white/5"
+            aria-label="Toggle sidebar"
+          >
+            {sidebarOpen ? 'Hide' : 'Show'}
+          </button>
+        </div>
+      </header>
+
+      <div className="h-[calc(100vh-80px)] text-white font-sans flex flex-col">
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 p-3 min-h-0">
         
         {/* Left Panel: Now Playing */}
-        <aside className="md:col-span-1 lg:col-span-1">
+        <aside className={`md:col-span-1 lg:col-span-1 ${sidebarOpen ? '' : 'hidden'} md:block overflow-y-auto custom-scrollbar`}>
           <NowPlayingCard
             currentStation={currentStation}
             currentGame={currentGame}
@@ -293,7 +380,6 @@ export default function Radio() {
             onPreviousTrack={goToPreviousTrack}
             onNextTrack={goToNextTrack}
             onOpenFocusMode={() => setIsFocusMode(true)}
-            LiveIndicator={LiveIndicator}
             volume={volume}
             isMuted={isMuted}
             onVolumeChange={handleVolumeChange}
@@ -302,7 +388,7 @@ export default function Radio() {
           
           {/* Recently Played Card */}
           {recentlyPlayed.length > 0 && (
-            <div className="mt-4">
+            <div className="mt-3">
               <RecentlyPlayedCard
                 recentStations={recentlyPlayed}
                 onStationSelect={handleStationSelect}
@@ -313,35 +399,26 @@ export default function Radio() {
         </aside>
 
         {/* Right Panel: Main Content */}
-        <main className="md:col-span-2 lg:col-span-3 bg-black/30 backdrop-blur-lg border border-white/10 rounded-lg p-6 overflow-y-auto custom-scrollbar">
+        <main ref={mainRef} className="md:col-span-2 lg:col-span-3 bg-black/30 backdrop-blur-lg border border-white/5 rounded-lg overflow-y-auto custom-scrollbar min-h-0">
+          <div className="p-4">
           {selectedGameView ? (
             // Single Game View - Spotify Style List
             <>
-              <header className="flex items-center gap-4 mb-8">
+              <header className="flex items-center gap-3 mb-4">
                 <button 
-                  onClick={handleBackToGames}
-                  className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-all duration-200 border border-white/20 hover:border-white/40"
+                  onClick={() => setSelectedGameView(null)}
+                  className="p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-all duration-200 border border-white/10 hover:border-white/20"
+                  aria-label="Back"
                 >
-                  <FaArrowLeft className="w-5 h-5" />
+                  <FaArrowLeft className="w-4 h-4" />
                 </button>
                 <div>
-                  <h1 className="text-3xl font-bold text-white">{selectedGameView.name}</h1>
-                  <p className="text-gray-400 mt-1">
-                    {getFilteredStations(selectedGameView.stations).length} of {selectedGameView.stations.length} radio stations
+                  <h2 className="text-lg font-bold text-white">{selectedGameView.name}</h2>
+                  <p className="text-gray-400 mt-0.5 text-xs">
+                    {getFilteredStations(selectedGameView.stations).length} of {selectedGameView.stations.length} stations
                   </p>
                 </div>
               </header>
-              
-              {/* Search and Filter */}
-              <div className="mb-6">
-                <SearchFilter
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  selectedGenre={selectedGenre}
-                  onGenreChange={setSelectedGenre}
-                  stations={selectedGameView.stations}
-                />
-              </div>
               
               {selectedGameView.stations.length > 0 ? (
                 (() => {
@@ -349,7 +426,7 @@ export default function Radio() {
                   return filteredStations.length > 0 ? (
                     <div className="space-y-1">
                       {/* List Header */}
-                      <div className="flex items-center gap-4 px-3 py-2 text-sm text-gray-400 border-b border-white/10 mb-2">
+                      <div className="flex items-center gap-4 px-3 py-2 text-sm text-gray-400 border-b border-white/5 mb-2">
                         <div className="w-8 text-center">#</div>
                         <div className="w-12"></div>
                         <div className="flex-1">Station</div>
@@ -388,14 +465,14 @@ export default function Radio() {
           ) : (
             // All Games View
             <>
-              <header className="mb-8">
-                <h1 className="text-4xl font-extrabold text-white">GTA Radio Stations</h1>
-                <p className="text-gray-400 mt-1">Live, synchronized radio from across the series.</p>
-              </header>
-              
-              <section className="mt-8">
-                <h2 className="text-2xl font-bold mb-4">Choose Your Game</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="sticky top-0 bg-black/90 backdrop-blur-md border-b border-white/5 z-20 -mx-4 px-4 py-3 mb-4">
+                <h2 className="text-3xl font-extrabold text-white">GTA Radio Stations</h2>
+                <p className="text-gray-400 mt-0.5">Live, synchronized radio from across the series.</p>
+              </div>
+
+              <section className="mt-6">
+                <h2 className="text-xl font-bold mb-3">Choose Your Game</h2>
+                <div className="grid grid-cols-3 gap-3">
                   <GameCard 
                     game={gameData.vcs} 
                     isDisabled={false} 
@@ -437,12 +514,12 @@ export default function Radio() {
 
               {/* Liked Channels Section */}
               {getLikedStations().length > 0 && (
-                <section className="mt-8">
-                  <div className="flex items-center gap-2 mb-4">
-                    <FaHeart className="text-pink-500 w-5 h-5" />
-                    <h2 className="text-2xl font-bold">Liked Channels</h2>
+                <section className="mt-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <FaHeart className="text-pink-500 w-4 h-4" />
+                    <h2 className="text-xl font-bold">Liked Channels</h2>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                     {getLikedStations().slice(0, 6).map(station => (
                       <div key={station.id} className="relative">
                         <StationCard 
@@ -464,15 +541,34 @@ export default function Radio() {
                   )}
                 </section>
               )}
+                {/* Recently Played */}
+                {recentlyPlayed.length > 0 && (
+                  <section className="mt-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="w-2 h-2 bg-pink-500 rounded-full" />
+                      <h2 className="text-xl font-bold">Recently Played</h2>
+                    </div>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+                      {recentlyPlayed.map(station => (
+                        <StationCard 
+                          key={station.id}
+                          station={station}
+                          onSelect={handleStationSelect}
+                          isSelected={currentStation?.id === station.id}
+                          isPlaying={isPlaying}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                )}
 
-              {/* Quick Access to Current Game Active Stations */}
-              <section className="mt-8">
-                <h2 className="text-2xl font-bold mb-4">{currentGame.name} - Active Stations</h2>
+              <section className="mt-6">
+                <h2 className="text-xl font-bold mb-3">{currentGame.name} - Active Stations</h2>
                 {(() => {
                   const activeStations = getActiveStations(currentGame.stations);
                   return activeStations.length > 0 ? (
                     <>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                         {activeStations.slice(0, 6).map(station => (
                           <StationCard 
                             key={station.id} 
@@ -507,7 +603,11 @@ export default function Radio() {
               </section>
             </>
           )}
+      </div>
         </main>
+        </div>
+
+  {/* No full-screen overlay; dropdown is anchored to the search input */}
       </div>
       
       {/* Focus Mode Overlay */}
@@ -524,7 +624,6 @@ export default function Radio() {
           onPreviousTrack={goToPreviousTrack}
           onNextTrack={goToNextTrack}
           onCloseFocusMode={() => setIsFocusMode(false)}
-          LiveIndicator={LiveIndicator}
         />
       )}
 
@@ -544,7 +643,7 @@ export default function Radio() {
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0c0c0c; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background-color: #0c0c0c; }
         .text-shadow-glow { text-shadow: 0 0 12px rgba(255, 255, 255, 0.4); }
         .animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
         @keyframes fadeInUp {

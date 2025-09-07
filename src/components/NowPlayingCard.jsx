@@ -15,14 +15,13 @@ const NowPlayingCard = ({
   onPreviousTrack,
   onNextTrack,
   onOpenFocusMode,
-  LiveIndicator,
   volume,
   isMuted,
   onVolumeChange,
   onToggleMute 
 }) => {
   return (
-    <div className="bg-pink-900/10 backdrop-blur-2xl border border-white/10 rounded-lg p-6 text-center relative">
+    <div className="bg-pink-900/10 backdrop-blur-2xl border border-white/5 rounded-lg p-6 text-center relative">
       {/* Expand button at top right */}
       <button 
         onClick={onOpenFocusMode} 
@@ -35,7 +34,6 @@ const NowPlayingCard = ({
       <div>
         <div className="flex items-center justify-center gap-2 mb-4">
           <h2 className="font-bold text-lg text-gray-400">Now Playing</h2>
-          <LiveIndicator className="" />
         </div>
         <img 
           src={currentStation?.logo || currentGame.logo} 
