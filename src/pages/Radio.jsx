@@ -32,7 +32,7 @@ export default function Radio() {
   // volume and mute managed by useRadioPlayer hook
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('all');
-  const [sidebarOpen, setSidebarOpen] = useState(false); // mobile sidebar
+  // Mobile sidebar state removed as toggle button was removed per feedback
   const [favorites, setFavorites] = useState(() => {
     const saved = localStorage.getItem('gta-radio-favorites');
     return saved ? new Set(JSON.parse(saved)) : new Set();
@@ -377,14 +377,7 @@ export default function Radio() {
             </div>
           </div>
 
-          {/* Sidebar toggle (mobile, absolute right) */}
-          <button
-            onClick={() => setSidebarOpen((v) => !v)}
-            className="md:hidden absolute right-3 top-1/2 -translate-y-1/2 px-2 py-1 text-sm rounded bg-white/10 border border-white/5"
-            aria-label="Toggle sidebar"
-          >
-            {sidebarOpen ? 'Hide' : 'Show'}
-          </button>
+          {/* Sidebar toggle removed on mobile per feedback */}
         </div>
       </header>
 
@@ -393,7 +386,7 @@ export default function Radio() {
         
         {/* Left Panel: Now Playing - Hidden on mobile */}
         {!isMobile && (
-          <aside className={`md:col-span-1 lg:col-span-1 ${sidebarOpen ? '' : 'hidden'} md:block overflow-y-auto custom-scrollbar`}>
+          <aside className="md:col-span-1 lg:col-span-1 md:block overflow-y-auto custom-scrollbar">
             <NowPlayingCard
               currentStation={currentStation}
               currentGame={currentGame}
@@ -429,12 +422,12 @@ export default function Radio() {
         <main ref={mainRef} className={`${isMobile ? 'w-full' : 'md:col-span-2 lg:col-span-3'} bg-black/30 backdrop-blur-lg border border-white/5 rounded-lg overflow-y-auto custom-scrollbar min-h-0`}>
           <div className="p-4">
           {selectedGameView ? (
-            // Single Game View - Spotify Style List
+            // Single Game View - Mobile-optimized List
             <>
-              <header className="flex items-center gap-3 mb-4">
+              <header className={`flex items-center gap-3 mb-4 ${isMobile ? 'px-4' : ''}`}>
                 <button 
                   onClick={() => setSelectedGameView(null)}
-                  className="p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-all duration-200 border border-white/10 hover:border-white/20"
+                  className="p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-all duration-200 border border-white/10 hover:border-white/20 min-w-[44px] min-h-[44px] flex items-center justify-center"
                   aria-label="Back"
                 >
                   <FaArrowLeft className="w-4 h-4" />
@@ -451,29 +444,52 @@ export default function Radio() {
                 (() => {
                   const filteredStations = getFilteredStations(selectedGameView.stations);
                   return filteredStations.length > 0 ? (
-                    <div className="space-y-1">
-                      {/* List Header */}
-                      <div className="flex items-center gap-4 px-3 py-2 text-sm text-gray-400 border-b border-white/5 mb-2">
-                        <div className="w-8 text-center">#</div>
-                        <div className="w-12"></div>
-                        <div className="flex-1">Station</div>
-                        <div className="w-16 text-center">♡</div>
-                        <div className="w-20 text-center">Duration</div>
-                      </div>
-                      
-                      {/* Station List */}
-                      {filteredStations.map((station, index) => (
-                        <StationListItem
-                          key={station.id}
-                          station={station}
-                          index={index}
-                          onSelect={handleStationSelect}
-                          isSelected={currentStation?.id === station.id}
-                          isPlaying={isPlaying}
-                          isFavorite={favorites.has(station.id)}
-                          onToggleFavorite={handleToggleFavorite}
-                        />
-                      ))}
+                    <div className={`${isMobile ? 'px-4' : ''}`}>
+                      {/* Mobile: Single column list with proper spacing */}
+                      {isMobile ? (
+                        <div className="space-y-3">
+                          {filteredStations.map((station, index) => (
+                            <StationListItem
+                              key={station.id}
+                              station={station}
+                              index={index}
+                              onSelect={handleStationSelect}
+                              isSelected={currentStation?.id === station.id}
+                              isPlaying={isPlaying}
+                              isFavorite={favorites.has(station.id)}
+                              onToggleFavorite={handleToggleFavorite}
+                              isMobile={true}
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        /* Desktop: Table-style layout */
+                        <div className="space-y-1">
+                          {/* List Header */}
+                          <div className="flex items-center gap-4 px-3 py-2 text-sm text-gray-400 border-b border-white/5 mb-2">
+                            <div className="w-8 text-center">#</div>
+                            <div className="w-12"></div>
+                            <div className="flex-1">Station</div>
+                            <div className="w-16 text-center">♡</div>
+                            <div className="w-20 text-center">Duration</div>
+                          </div>
+                          
+                          {/* Station List */}
+                          {filteredStations.map((station, index) => (
+                            <StationListItem
+                              key={station.id}
+                              station={station}
+                              index={index}
+                              onSelect={handleStationSelect}
+                              isSelected={currentStation?.id === station.id}
+                              isPlaying={isPlaying}
+                              isFavorite={favorites.has(station.id)}
+                              onToggleFavorite={handleToggleFavorite}
+                              isMobile={false}
+                            />
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="text-center py-16">
@@ -737,7 +753,7 @@ export default function Radio() {
 
       {/* Mobile Expanded Player Overlay */}
       {isMobile && isMobilePlayerExpanded && (
-        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl">
+        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl pb-safe">
           <MobileNowPlayingCard
             currentStation={currentStation}
             currentGame={currentGame}
