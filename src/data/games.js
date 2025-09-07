@@ -138,6 +138,14 @@ export const games = {
     background: '#0b0f0b', 
     stations: [] 
   },
+  gta3: { 
+    id: 'gta3', 
+    name: 'Grand Theft Auto III', 
+    logo: gta3Logo,
+    banner: gta3Banner,
+    background: '#0d0a0a', 
+    stations: [] 
+  },
   gtaiv: { 
     id: 'gtaiv', 
     name: 'Grand Theft Auto IV', 
@@ -152,14 +160,6 @@ export const games = {
     logo: gtavLogo,
     banner: gtavBanner,
     background: '#081012', 
-    stations: [] 
-  },
-  gta3: { 
-    id: 'gta3', 
-    name: 'Grand Theft Auto III', 
-    logo: gta3Logo,
-    banner: gta3Banner,
-    background: '#0d0a0a', 
     stations: [] 
   },
 };

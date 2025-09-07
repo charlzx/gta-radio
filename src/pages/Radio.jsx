@@ -472,7 +472,7 @@ export default function Radio() {
 
               <section className="mt-6">
                 <h2 className="text-xl font-bold mb-3">Choose Your Game</h2>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                   <GameCard 
                     game={gameData.vcs} 
                     isDisabled={false} 
@@ -624,6 +624,11 @@ export default function Radio() {
           onPreviousTrack={goToPreviousTrack}
           onNextTrack={goToNextTrack}
           onCloseFocusMode={() => setIsFocusMode(false)}
+          volume={volume}
+          isMuted={isMuted}
+          onVolumeChange={handleVolumeChange}
+          onToggleMute={handleToggleMute}
+          onSeek={(t) => { if (audioRef.current && Number.isFinite(t)) { audioRef.current.currentTime = Math.max(0, Math.min(duration || 0, t)); } }}
         />
       )}
 

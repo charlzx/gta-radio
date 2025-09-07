@@ -1,60 +1,63 @@
 import React from 'react';
 
-const GameCard = ({ game, isDisabled, onSelect, isSelected }) => (
-  <div 
-    className={`relative rounded-lg h-28 flex items-center justify-center p-2 transition-all duration-300 cursor-pointer overflow-hidden border border-white/10
-      ${isSelected ? 'ring-1 ring-pink-500/50 border-pink-500/30' : 'hover:border-white/20'} 
-      ${isDisabled ? 'hover:scale-[1.01]' : 'hover:scale-[1.01]'}`}
-    onClick={() => !isDisabled && onSelect(game)}
-  >
-    {/* Banner image with alt text fallback */}
-    {game.banner ? (
+const GameCard = ({ game, isDisabled, onSelect, isSelected }) => {
+  // Theme colors for each GTA game
+  const getGameThemeColor = (gameId) => {
+    const themes = {
+      'vcs': 'bg-gradient-to-br from-pink-900/40 to-purple-900/40', // Vice City Stories - neon pink/purple
+      'vc': 'bg-gradient-to-br from-pink-800/40 to-cyan-800/40',    // Vice City - 80s neon
+      'sa': 'bg-gradient-to-br from-orange-900/40 to-yellow-900/40', // San Andreas - California sunset
+      'gtaiv': 'bg-gradient-to-br from-gray-800/40 to-blue-900/40',  // GTA IV - dark urban
+      'gtav': 'bg-gradient-to-br from-green-900/40 to-blue-900/40',  // GTA V - Los Santos green/blue
+      'gta3': 'bg-gradient-to-br from-gray-900/40 to-slate-800/40'   // GTA III - dark gritty
+    };
+    return themes[gameId] || 'bg-gradient-to-br from-white/10 to-white/5';
+  };
+
+  const themeColor = getGameThemeColor(game.id);
+  
+  return (
+    <div 
+      className={`relative rounded-lg aspect-square flex items-center justify-center p-4 transition-all duration-300 cursor-pointer overflow-hidden border border-white/10 ${themeColor}
+        ${isSelected ? 'ring-2 ring-pink-500/50 border-pink-500/30' : 'hover:border-white/20'} 
+        ${isDisabled ? 'hover:scale-[1.02]' : 'hover:scale-[1.02]'}`}
+      onClick={() => !isDisabled && onSelect(game)}
+    >
+    {/* Game logo */}
+    {game.logo ? (
       <img 
-        src={game.banner} 
+        src={game.logo} 
         alt={game.name}
-        className="absolute inset-0 w-full h-full object-cover"
+        className={`max-w-full max-h-full object-contain transition-all duration-300
+          ${isDisabled ? 'opacity-50 grayscale' : 'opacity-90 hover:opacity-100'}`}
       />
     ) : (
-      /* Fallback background for games without banner */
-      <div className={`absolute inset-0 
-        ${isSelected ? 'bg-pink-500/20' : 
-          isDisabled ? 'bg-white/5' : 'bg-white/10'}`}></div>
-    )}
-
-    {/* Dark overlay for better visibility */}
-    <div className={`absolute inset-0 
-      ${isSelected ? 'bg-gradient-to-t from-pink-900/70 to-pink-900/0' : 
-        isDisabled ? 'bg-black/80' : 'bg-gradient-to-t from-black/80 to-black/60 hover:from-black/70 hover:to-black/50'} 
-      transition-all duration-300`}></div>
-    
-    {/* Show text only when there's no banner image */}
-    {!game.banner && (
-      <h3 className={`relative z-10 font-bold text-lg text-center 
-        ${isDisabled ? 'text-gray-300' : 'text-white'} 
-        drop-shadow-2xl shadow-black/80`}
-        style={{
-          textShadow: '2px 2px 4px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6)'
-        }}>
-        {game.name}
-      </h3>
+      /* Fallback for games without logo */
+      <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold
+        ${isSelected ? 'bg-pink-500/30 text-pink-300' : 
+          isDisabled ? 'bg-white/10 text-gray-400' : 'bg-white/20 text-white'}`}>
+        {game.name.split(' ').pop().charAt(0)}
+      </div>
     )}
     
+    {/* Status badges */}
     {isDisabled && (
-      <div className="absolute top-2 right-2 text-xs bg-gray-700/90 backdrop-blur-sm text-gray-300 px-1.5 py-0.5 rounded-full z-10">
+      <div className="absolute top-2 right-2 text-xs bg-gray-700/90 backdrop-blur-sm text-gray-300 px-2 py-1 rounded-full z-10">
         SOON
       </div>
     )}
     {!isDisabled && !isSelected && (
-      <div className="absolute top-2 right-2 text-xs bg-pink-600/90 backdrop-blur-sm text-white px-1.5 py-0.5 rounded-full z-10">
+      <div className="absolute top-2 right-2 text-xs bg-pink-600/90 backdrop-blur-sm text-white px-2 py-1 rounded-full z-10">
         ACTIVE
       </div>
     )}
     {isSelected && (
-      <div className="absolute top-2 right-2 text-xs bg-pink-500/90 backdrop-blur-sm text-white px-1.5 py-0.5 rounded-full z-10">
+      <div className="absolute top-2 right-2 text-xs bg-pink-500/90 backdrop-blur-sm text-white px-2 py-1 rounded-full z-10">
         SELECTED
       </div>
     )}
   </div>
-);
+  );
+};
 
 export default GameCard;
