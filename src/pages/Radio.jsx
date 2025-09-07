@@ -419,7 +419,7 @@ export default function Radio() {
         )}
 
         {/* Right Panel: Main Content */}
-        <main ref={mainRef} className={`${isMobile ? 'w-full' : 'md:col-span-2 lg:col-span-3'} bg-black/30 backdrop-blur-lg border border-white/5 rounded-lg overflow-y-auto custom-scrollbar min-h-0`}>
+        <main ref={mainRef} className={`${isMobile ? 'w-full pb-safe' : 'md:col-span-2 lg:col-span-3'} bg-black/30 backdrop-blur-lg border border-white/5 rounded-lg overflow-y-auto custom-scrollbar min-h-0`}>
           <div className="p-4">
           {selectedGameView ? (
             // Single Game View - Mobile-optimized List
@@ -439,15 +439,27 @@ export default function Radio() {
                   </p>
                 </div>
               </header>
+
+              {/* Search Filter - Pinned at top on mobile */}
+              <div className={`sticky top-0 z-10 bg-black/90 backdrop-blur-md ${isMobile ? 'px-4 py-3 -mx-4' : 'mb-4'}`}>
+                <SearchFilter
+                  className="mb-0"
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  selectedGenre={selectedGenre}
+                  onGenreChange={setSelectedGenre}
+                  placeholder={`Search ${selectedGameView.name} stations...`}
+                />
+              </div>
               
               {selectedGameView.stations.length > 0 ? (
                 (() => {
                   const filteredStations = getFilteredStations(selectedGameView.stations);
                   return filteredStations.length > 0 ? (
-                    <div className={`${isMobile ? 'px-4' : ''}`}>
-                      {/* Mobile: Single column list with proper spacing */}
+                    <div>
+                      {/* Mobile: Single column, full-width list with 16px horizontal padding */}
                       {isMobile ? (
-                        <div className="space-y-3">
+                        <div className="px-4 space-y-3">
                           {filteredStations.map((station, index) => (
                             <StationListItem
                               key={station.id}

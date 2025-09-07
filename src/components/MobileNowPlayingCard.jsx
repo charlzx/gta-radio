@@ -45,10 +45,10 @@ const MobileNowPlayingCard = ({
           <div className="text-lg font-bold text-white">Now Playing</div>
           <button
             onClick={onCollapse}
-            className="p-3 rounded-full bg-white/20 hover:bg-white/30 transition-colors border border-white/30 min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="p-3 rounded-full bg-white/20 hover:bg-white/30 text-white shadow-md transition-colors"
             aria-label="Collapse player"
           >
-            <FaChevronDown className="w-6 h-6 text-white" />
+            <FaChevronDown className="w-6 h-6" />
           </button>
         </div>
         <div className="text-center py-8">
@@ -61,43 +61,37 @@ const MobileNowPlayingCard = ({
 
   return (
     <div className="bg-black/95 backdrop-blur-xl border-t border-white/20 p-4 pb-safe max-h-[80vh] overflow-y-auto">
-      {/* Header with collapse button */}
-      <div className="flex items-center justify-between mb-6">
+      {/* Header with collapse button (high-contrast, larger hit area) */}
+      <div className="flex items-center justify-between mb-4">
         <div className="text-lg font-bold text-white">Now Playing</div>
         <button
           onClick={onCollapse}
-          className="p-3 rounded-full bg-white/20 hover:bg-white/30 transition-colors border border-white/30 min-w-[44px] min-h-[44px] flex items-center justify-center"
+          className="p-3 rounded-full bg-white/20 hover:bg-white/30 text-white shadow-md transition-colors"
           aria-label="Collapse player"
         >
-          <FaChevronDown className="w-6 h-6 text-white" />
+          <FaChevronDown className="w-6 h-6" />
         </button>
       </div>
 
-      {/* Large Station Artwork */}
-      <div className="flex justify-center mb-4">
+      {/* Artwork above LIVE tag and titles */}
+      <div className="flex flex-col items-center text-center gap-4 mb-6">
         <img
           src={currentStation.logo || currentGame.logo}
           alt={currentStation.name}
-          className="w-32 h-32 rounded-xl object-contain bg-black/30 border border-white/10 shadow-2xl"
+          className="w-36 h-36 rounded-xl object-cover bg-black/30 border border-white/10"
           draggable="false"
         />
-      </div>
-
-      {/* LIVE indicator and Station Info */}
-      <div className="text-center mb-6">
-        <div className="flex items-center justify-center gap-2 mb-3">
-          <span className="text-xs px-3 py-1.5 rounded-full bg-red-600 text-white font-bold tracking-wide flex items-center gap-2">
-            <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-red-600 text-white font-bold tracking-wide">
             LIVE
           </span>
         </div>
-        <div className="text-white font-bold text-xl mb-2">{currentStation.name}</div>
-        <div className="text-sm text-gray-400 mb-3">{currentGame.name}</div>
-        <div className="text-pink-300 text-base font-medium px-4">
-          {nowPlaying?.type === 'Song' && nowPlaying.artist 
-            ? `${nowPlaying.artist} — ${nowPlaying.title}` 
-            : nowPlaying?.title || 'Tuned'
-          }
+        <div className="text-white font-bold text-lg">{currentStation.name}</div>
+        <div className="text-xs text-gray-400">{currentGame.name}</div>
+        <div className="text-pink-300 text-sm">
+          {nowPlaying?.type === 'Song' && nowPlaying.artist
+            ? `${nowPlaying.artist} — ${nowPlaying.title}`
+            : nowPlaying?.title || 'Tuned'}
         </div>
       </div>
 

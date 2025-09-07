@@ -23,7 +23,7 @@ const StationListItem = ({
       className={`group flex items-center gap-4 rounded-lg transition-all duration-200 cursor-pointer hover:bg-white/5 
         ${isSelected ? 'bg-pink-500/10 border border-pink-500/20' : ''}
         ${!station.audioUrl ? 'opacity-60' : ''}
-        ${isMobile ? 'p-4 min-h-[56px] border border-white/5' : 'p-3'}`}
+        ${isMobile ? 'p-4 min-h-[56px] border border-white/5 bg-white/5' : 'p-3'}`}
       onClick={() => station.audioUrl && onSelect(station)}
     >
       {/* Track Number / Play Button */}
