@@ -102,7 +102,7 @@ const NowPlayingCard = ({
           <img
             src={currentStation.logo || currentGame.logo}
             alt={currentStation.name}
-            className="w-14 h-14 rounded-lg object-contain bg-black/30 border border-white/10"
+            className="w-14 h-14 rounded-lg object-cover aspect-square bg-black/30 border border-white/10"
             draggable="false"
           />
           <div className="flex-1 min-w-0">

@@ -4,6 +4,17 @@
 import vcsLogo from '../assets/games/vcs/vcs-logo.png';
 import vcsBanner from '../assets/games/vcs/vcs-banner.png';
 
+// VCS Station logos
+import flashFMLogo from '../assets/games/vcs/stations/flashfm.png';
+import vRockLogo from '../assets/games/vcs/stations/vrock.png';
+import emotionLogo from '../assets/games/vcs/stations/emotion.png';
+import waveLogo from '../assets/games/vcs/stations/wave.png';
+import paradiseLogo from '../assets/games/vcs/stations/paradise.png';
+import vcflLogo from '../assets/games/vcs/stations/vcfl.png';
+import freshLogo from '../assets/games/vcs/stations/fresh.png';
+import espantosoLogo from '../assets/games/vcs/stations/espantoso.png';
+import vcprLogo from '../assets/games/vcs/stations/vcpr.png';
+
 import vcLogo from '../assets/games/vc/vc-logo.png';
 import vcBanner from '../assets/games/vc/vc-banner.png';
 
@@ -31,7 +42,7 @@ export const games = {
       {
         id: 'vcs-flash',
         name: 'Flash FM',
-        logo: 'https://placehold.co/200x200/E91E63/ffffff?text=Flash',
+        logo: flashFMLogo,
         audioUrl: 'https://storage.googleapis.com/gtaradio-test/VCS_Flash_FM.mp3',
         duration: 3891,
         tracklist: [
@@ -42,7 +53,7 @@ export const games = {
       {
         id: 'vcs-vrock',
         name: 'V-Rock',
-        logo: 'https://placehold.co/200x200/f44336/ffffff?text=V-Rock',
+        logo: vRockLogo,
         audioUrl: 'https://storage.googleapis.com/gtaradio-test/VCS_VRock.mp3',
         duration: 3581,
         tracklist: [
@@ -53,7 +64,7 @@ export const games = {
       { 
         id: 'vcs-emotion', 
         name: 'Emotion 98.3', 
-        logo: 'https://placehold.co/200x200/FF4081/ffffff?text=Emotion', 
+        logo: emotionLogo, 
         audioUrl: null, 
         duration: 0, 
         tracklist: [
@@ -63,7 +74,7 @@ export const games = {
       { 
         id: 'vcs-wave', 
         name: 'The Wave 103', 
-        logo: 'https://placehold.co/200x200/2196F3/ffffff?text=Wave', 
+        logo: waveLogo, 
         audioUrl: null, 
         duration: 0, 
         tracklist: [
@@ -73,7 +84,7 @@ export const games = {
       { 
         id: 'vcs-paradise', 
         name: 'Paradise FM', 
-        logo: 'https://placehold.co/200x200/4CAF50/ffffff?text=Paradise', 
+        logo: paradiseLogo, 
         audioUrl: null, 
         duration: 0, 
         tracklist: [
@@ -83,7 +94,7 @@ export const games = {
       { 
         id: 'vcs-vcfl', 
         name: 'VCFL', 
-        logo: 'https://placehold.co/200x200/795548/ffffff?text=VCFL', 
+        logo: vcflLogo, 
         audioUrl: null, 
         duration: 0, 
         tracklist: [
@@ -93,7 +104,7 @@ export const games = {
       { 
         id: 'vcs-fresh', 
         name: 'Fresh 105 FM', 
-        logo: 'https://placehold.co/200x200/8BC34A/000000?text=Fresh', 
+        logo: freshLogo, 
         audioUrl: null, 
         duration: 0, 
         tracklist: [
@@ -103,7 +114,7 @@ export const games = {
       { 
         id: 'vcs-espantoso', 
         name: 'Espantoso', 
-        logo: 'https://placehold.co/200x200/FF5722/ffffff?text=Espantoso', 
+        logo: espantosoLogo, 
         audioUrl: null, 
         duration: 0, 
         tracklist: [
@@ -113,7 +124,7 @@ export const games = {
       { 
         id: 'vcs-vcpr', 
         name: 'VCPR', 
-        logo: 'https://placehold.co/200x200/9C27B0/ffffff?text=VCPR', 
+        logo: vcprLogo, 
         audioUrl: null, 
         duration: 0, 
         tracklist: [

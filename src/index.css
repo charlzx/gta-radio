@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
-
 @media (max-width: 768px) {
     button, [role="button"] {
         min-height: 0px !important;
@@ -17,6 +16,48 @@
 
 .animate-subtle-blink {
   animation: subtle-blink 2s ease-in-out infinite;
+}
+
+/* Station logo consistent sizing for cards and list items */
+.station-logo {
+  object-fit: cover !important;
+  object-position: center !important;
+  aspect-ratio: 1 / 1 !important;
+}
+
+.station-logo-list {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  aspect-ratio: 1 / 1 !important;
+  border-radius: 0.5rem; /* 8px */
+}
+
+.station-logo-compact {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  aspect-ratio: 1 / 1 !important;
+}
+
+/* Ensure all station images maintain consistent dimensions regardless of original size */
+img[src*="stations/"] {
+  aspect-ratio: 1 / 1 !important;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
+/* Force consistent sizing for all images in specific components */
+.recently-played img,
+.active-stations img,
+.station-card img {
+  aspect-ratio: 1 / 1 !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 /* Hide scrollbars */

@@ -5,7 +5,6 @@ const StationListItem = ({
   station, 
   onSelect, 
   isSelected, 
-  isPlaying, 
   index, 
   isFavorite, 
   onToggleFavorite,
@@ -43,7 +42,7 @@ const StationListItem = ({
         <img 
           src={station.logo} 
           alt={station.name} 
-          className="w-full h-full object-cover"
+          className="station-logo-list"
         />
       </div>
 

@@ -8,10 +8,10 @@ const StationCard = ({ station, onSelect, isSelected, isPlaying, size = 'default
   
   return (
     <div 
-      className={`relative rounded-lg overflow-hidden transition-all duration-300 ease-in-out group cursor-pointer border border-white/10
+      className={`station-card relative rounded-lg overflow-hidden transition-all duration-300 ease-in-out group cursor-pointer border border-white/10
         ${isSelected ? '' : 'hover:border-white/20'}
         ${!station.audioUrl ? 'opacity-60' : 'hover:scale-[1.01]'}
-        ${isCompact ? 'flex-shrink-0' : ''}`} 
+        ${isCompact ? 'flex-shrink-0 w-full aspect-square' : ''}`} 
       style={isCompact ? { minWidth: typeof compactMinWidth === 'number' ? `${compactMinWidth}px` : compactMinWidth } : undefined}
       onClick={() => station.audioUrl && onSelect(station)}
     >
@@ -24,7 +24,7 @@ const StationCard = ({ station, onSelect, isSelected, isPlaying, size = 'default
         src={station.logo} 
         alt={station.name} 
         draggable="false" 
-        className={`w-full h-full object-cover ${isCompact ? 'aspect-square' : 'aspect-square'}`}
+        className="w-full h-full object-cover aspect-square"
       />
       <div className={`absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end 
         ${isCompact || isMobile ? 'p-2 xs:p-1.5' : 'p-3'} 

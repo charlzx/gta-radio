@@ -78,7 +78,7 @@ const MobileNowPlayingCard = ({
         <img
           src={currentStation.logo || currentGame.logo}
           alt={currentStation.name}
-          className="w-44 h-44 rounded-xl object-cover bg-black/30 border border-white/10"
+          className="w-44 h-44 rounded-xl object-cover aspect-square bg-black/30 border border-white/10"
           draggable="false"
         />
         <div className="flex items-center gap-2">

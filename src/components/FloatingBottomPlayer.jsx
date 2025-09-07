@@ -31,7 +31,7 @@ const FloatingBottomPlayer = ({
         <img 
           src={currentStation.logo} 
           alt={currentStation.name}
-          className="w-12 h-12 rounded-lg object-cover flex-shrink-0 border border-white/10" 
+          className="w-12 h-12 rounded-lg object-cover aspect-square flex-shrink-0 border border-white/10" 
         />
         
         {/* Track info - tappable area */}

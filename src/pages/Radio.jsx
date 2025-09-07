@@ -80,15 +80,14 @@ export default function Radio() {
     });
   };
 
-  // Filter stations based on search and genre
-  const getFilteredStations = (stations) => {
-    return stations.filter(station => {
-      const matchesSearch = station.name.toLowerCase().includes(searchQuery.toLowerCase());
-      // Since stations don't have genre property yet, we'll just filter by name for now
-      const matchesGenre = selectedGenre === 'all';
-      return matchesSearch && matchesGenre;
-    });
-  };
+  // Filter stations based on search and genre (currently unused; will be re-enabled with full search UI)
+  // const getFilteredStations = (stations) => {
+  //   return stations.filter(station => {
+  //     const matchesSearch = station.name.toLowerCase().includes(searchQuery.toLowerCase());
+  //     const matchesGenre = selectedGenre === 'all';
+  //     return matchesSearch && matchesGenre;
+  //   });
+  // };
 
   // Get active stations (those with audio available)
   const getActiveStations = (stations) => {
@@ -419,7 +418,7 @@ export default function Radio() {
         )}
 
         {/* Right Panel: Main Content */}
-        <main ref={mainRef} className={`${isMobile ? 'w-full pb-safe' : 'md:col-span-2 lg:col-span-3'} bg-black/30 backdrop-blur-lg rounded-lg overflow-y-auto ${isMobile ? 'scrollbar-hide' : 'custom-scrollbar'} min-h-0 shadow-inner shadow-white/5`}>
+  <main ref={mainRef} className={`${isMobile ? 'w-full pb-safe overflow-x-hidden' : 'md:col-span-2 lg:col-span-3'} bg-black/30 backdrop-blur-lg rounded-lg overflow-y-auto ${isMobile ? 'scrollbar-hide' : 'custom-scrollbar'} min-h-0 shadow-inner shadow-white/5`}>
           <div className="p-0 sm:p-4">
           {selectedGameView ? (
             // Single Game View - Mobile-optimized List
@@ -452,7 +451,6 @@ export default function Radio() {
                           index={index}
                           onSelect={handleStationSelect}
                           isSelected={currentStation?.id === station.id}
-                          isPlaying={isPlaying}
                           isFavorite={favorites.has(station.id)}
                           onToggleFavorite={handleToggleFavorite}
                           isMobile={true}
@@ -479,7 +477,6 @@ export default function Radio() {
                           index={index}
                           onSelect={handleStationSelect}
                           isSelected={currentStation?.id === station.id}
-                          isPlaying={isPlaying}
                           isFavorite={favorites.has(station.id)}
                           onToggleFavorite={handleToggleFavorite}
                           isMobile={false}
@@ -579,7 +576,7 @@ export default function Radio() {
                     {isMobile ? (
                       <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-hide">
                         {recentlyPlayed.map(station => (
-                          <div key={station.id} className="min-w-[104px]">
+                          <div key={station.id} className="w-[104px] flex-shrink-0">
                             <StationCard 
                               station={station}
                               onSelect={handleStationSelect}
@@ -607,7 +604,7 @@ export default function Radio() {
                   </section>
                 )}
 
-              <section className="mt-6">
+              <section className="active-stations mt-6">
                 <h2 className="text-xl font-bold mb-3">{currentGame.name} - Active Stations</h2>
                 {(() => {
                   const activeStations = getActiveStations(currentGame.stations);
@@ -616,7 +613,7 @@ export default function Radio() {
                       {isMobile ? (
                         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                           {activeStations.map(station => (
-                            <div key={station.id} className="min-w-[120px]">
+                            <div key={station.id} className="w-[120px] flex-shrink-0">
                               <StationCard 
                                 station={station} 
                                 onSelect={handleStationSelect} 
