@@ -34,7 +34,7 @@ const FocusMode = ({
     return { nextTrack: idx >= 0 ? tl[idx + 1] || null : null };
   }, [currentStation?.tracklist, currentTime]);
 
-  const bgImage = currentGame?.background || currentGame?.banner || currentStation?.logo || currentGame?.logo;
+  // Removed unused bgImage variable
 
   // Keyboard shortcuts (Escape to close, arrows/Home/End to seek)
   useEffect(() => {

@@ -20,12 +20,7 @@ const Stat = ({ value, label }) => (
 );
 
 export default function Home() {
-  const formatGameName = (name) => {
-    if (!name) return '';
-    let n = name.replace(/^Grand\s+Theft\s+Auto\s*-\s*/i, 'GTA ');
-    n = n.replace(/^Grand\s+Theft\s+Auto\s+/i, 'GTA ');
-    return n;
-  };
+  // Removed unused formatGameName function
 
   const gameList = useMemo(() => Object.values(gamesData), []);
   const playableStations = useMemo(() => {

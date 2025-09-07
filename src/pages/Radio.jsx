@@ -5,11 +5,14 @@ import GameCard from '../components/GameCard';
 import StationCard from '../components/StationCard';
 import StationListItem from '../components/StationListItem';
 import NowPlayingCard from '../components/NowPlayingCard';
+import MobileNowPlayingCard from '../components/MobileNowPlayingCard';
+import FloatingBottomPlayer from '../components/FloatingBottomPlayer';
 import FocusMode from '../components/FocusMode';
 import SearchFilter from '../components/SearchFilter';
 import RecentlyPlayedCard from '../components/RecentlyPlayedCard';
 import MiniPlayer from '../components/MiniPlayer';
 import { useRadioPlayer } from '../hooks/useRadioPlayer';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 export default function Radio() {
   const [gameData] = useState(games);
@@ -20,6 +23,10 @@ export default function Radio() {
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+
+  // Mobile-specific states
+  const isMobile = useIsMobile();
+  const [isMobilePlayerExpanded, setIsMobilePlayerExpanded] = useState(false);
 
   // New feature states
   // volume and mute managed by useRadioPlayer hook
@@ -126,6 +133,24 @@ export default function Radio() {
     setTimeout(() => {
       if(audioRef.current) togglePlayPause();
     }, 100);
+  };
+
+  // Mobile-specific handlers
+  const handleMobilePlayerExpand = () => {
+    setIsMobilePlayerExpanded(true);
+  };
+
+  const handleMobilePlayerCollapse = () => {
+    setIsMobilePlayerExpanded(false);
+  };
+
+  const handleOpenFocusMode = () => {
+    if (isMobile) {
+      // On mobile, expand the bottom player instead of focus mode
+      setIsMobilePlayerExpanded(true);
+    } else {
+      setIsFocusMode(true);
+    }
   };
 
   const togglePlayPause = () => {
@@ -363,43 +388,45 @@ export default function Radio() {
         </div>
       </header>
 
-      <div className="h-[calc(100vh-80px)] text-white font-sans flex flex-col">
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3 p-3 min-h-0">
+      <div className={`h-[calc(100vh-80px)] text-white font-sans flex flex-col ${isMobile && currentStation ? 'pb-20' : ''}`}>
+        <div className={`flex-1 ${isMobile ? 'block' : 'grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4'} gap-3 p-3 min-h-0`}>
         
-        {/* Left Panel: Now Playing */}
-        <aside className={`md:col-span-1 lg:col-span-1 ${sidebarOpen ? '' : 'hidden'} md:block overflow-y-auto custom-scrollbar`}>
-          <NowPlayingCard
-            currentStation={currentStation}
-            currentGame={currentGame}
-            nowPlaying={nowPlaying}
-            isPlaying={isPlaying}
-            currentTime={currentTime}
-            duration={duration}
-            formatTime={formatTime}
-            onTogglePlayPause={togglePlayPause}
-            onPreviousTrack={goToPreviousTrack}
-            onNextTrack={goToNextTrack}
-            onOpenFocusMode={() => setIsFocusMode(true)}
-            volume={volume}
-            isMuted={isMuted}
-            onVolumeChange={handleVolumeChange}
-            onToggleMute={handleToggleMute}
-          />
-          
-          {/* Recently Played Card */}
-          {recentlyPlayed.length > 0 && (
-            <div className="mt-3">
-              <RecentlyPlayedCard
-                recentStations={recentlyPlayed}
-                onStationSelect={handleStationSelect}
-                currentStationId={currentStation?.id}
-              />
-            </div>
-          )}
-        </aside>
+        {/* Left Panel: Now Playing - Hidden on mobile */}
+        {!isMobile && (
+          <aside className={`md:col-span-1 lg:col-span-1 ${sidebarOpen ? '' : 'hidden'} md:block overflow-y-auto custom-scrollbar`}>
+            <NowPlayingCard
+              currentStation={currentStation}
+              currentGame={currentGame}
+              nowPlaying={nowPlaying}
+              isPlaying={isPlaying}
+              currentTime={currentTime}
+              duration={duration}
+              formatTime={formatTime}
+              onTogglePlayPause={togglePlayPause}
+              onPreviousTrack={goToPreviousTrack}
+              onNextTrack={goToNextTrack}
+              onOpenFocusMode={handleOpenFocusMode}
+              volume={volume}
+              isMuted={isMuted}
+              onVolumeChange={handleVolumeChange}
+              onToggleMute={handleToggleMute}
+            />
+            
+            {/* Recently Played Card */}
+            {recentlyPlayed.length > 0 && (
+              <div className="mt-3">
+                <RecentlyPlayedCard
+                  recentStations={recentlyPlayed}
+                  onStationSelect={handleStationSelect}
+                  currentStationId={currentStation?.id}
+                />
+              </div>
+            )}
+          </aside>
+        )}
 
         {/* Right Panel: Main Content */}
-        <main ref={mainRef} className="md:col-span-2 lg:col-span-3 bg-black/30 backdrop-blur-lg border border-white/5 rounded-lg overflow-y-auto custom-scrollbar min-h-0">
+        <main ref={mainRef} className={`${isMobile ? 'w-full' : 'md:col-span-2 lg:col-span-3'} bg-black/30 backdrop-blur-lg border border-white/5 rounded-lg overflow-y-auto custom-scrollbar min-h-0`}>
           <div className="p-4">
           {selectedGameView ? (
             // Single Game View - Spotify Style List
@@ -519,24 +546,43 @@ export default function Radio() {
                     <FaHeart className="text-pink-500 w-4 h-4" />
                     <h2 className="text-xl font-bold">Liked Channels</h2>
                   </div>
-                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-                    {getLikedStations().slice(0, 6).map(station => (
-                      <div key={station.id} className="relative">
-                        <StationCard 
-                          station={station} 
-                          onSelect={handleStationSelect} 
-                          isSelected={currentStation?.id === station.id} 
-                          isPlaying={isPlaying} 
-                        />
-                        <div className="absolute top-2 left-2 text-xs bg-pink-500/90 backdrop-blur-sm text-white px-2 py-1 rounded-full z-10">
-                          {station.gameName.split(' - ')[1] || station.gameName}
+                  {isMobile ? (
+                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                      {getLikedStations().slice(0, 10).map(station => (
+                        <div key={station.id} className="relative min-w-[120px]">
+                          <StationCard 
+                            station={station} 
+                            onSelect={handleStationSelect} 
+                            isSelected={currentStation?.id === station.id} 
+                            isPlaying={isPlaying}
+                            size="compact"
+                          />
+                          <div className="absolute top-2 left-2 text-xs bg-pink-500/90 backdrop-blur-sm text-white px-1.5 py-0.5 rounded-full z-10">
+                            {station.gameName.split(' - ')[1] || station.gameName}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                  {getLikedStations().length > 6 && (
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                      {getLikedStations().slice(0, 6).map(station => (
+                        <div key={station.id} className="relative">
+                          <StationCard 
+                            station={station} 
+                            onSelect={handleStationSelect} 
+                            isSelected={currentStation?.id === station.id} 
+                            isPlaying={isPlaying} 
+                          />
+                          <div className="absolute top-2 left-2 text-xs bg-pink-500/90 backdrop-blur-sm text-white px-2 py-1 rounded-full z-10">
+                            {station.gameName.split(' - ')[1] || station.gameName}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {getLikedStations().length > (isMobile ? 10 : 6) && (
                     <p className="mt-4 text-gray-400 text-sm">
-                      +{getLikedStations().length - 6} more liked stations
+                      +{getLikedStations().length - (isMobile ? 10 : 6)} more liked stations
                     </p>
                   )}
                 </section>
@@ -548,17 +594,33 @@ export default function Radio() {
                       <span className="w-2 h-2 bg-pink-500 rounded-full" />
                       <h2 className="text-xl font-bold">Recently Played</h2>
                     </div>
-                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
-                      {recentlyPlayed.map(station => (
-                        <StationCard 
-                          key={station.id}
-                          station={station}
-                          onSelect={handleStationSelect}
-                          isSelected={currentStation?.id === station.id}
-                          isPlaying={isPlaying}
-                        />
-                      ))}
-                    </div>
+                    {isMobile ? (
+                      <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                        {recentlyPlayed.map(station => (
+                          <div key={station.id} className="min-w-[120px]">
+                            <StationCard 
+                              station={station}
+                              onSelect={handleStationSelect}
+                              isSelected={currentStation?.id === station.id}
+                              isPlaying={isPlaying}
+                              size="compact"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+                        {recentlyPlayed.map(station => (
+                          <StationCard 
+                            key={station.id}
+                            station={station}
+                            onSelect={handleStationSelect}
+                            isSelected={currentStation?.id === station.id}
+                            isPlaying={isPlaying}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </section>
                 )}
 
@@ -568,18 +630,34 @@ export default function Radio() {
                   const activeStations = getActiveStations(currentGame.stations);
                   return activeStations.length > 0 ? (
                     <>
-                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-                        {activeStations.slice(0, 6).map(station => (
-                          <StationCard 
-                            key={station.id} 
-                            station={station} 
-                            onSelect={handleStationSelect} 
-                            isSelected={currentStation?.id === station.id} 
-                            isPlaying={isPlaying} 
-                          />
-                        ))}
-                      </div>
-                      {activeStations.length > 6 && (
+                      {isMobile ? (
+                        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                          {activeStations.map(station => (
+                            <div key={station.id} className="min-w-[120px]">
+                              <StationCard 
+                                station={station} 
+                                onSelect={handleStationSelect} 
+                                isSelected={currentStation?.id === station.id} 
+                                isPlaying={isPlaying}
+                                size="compact"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                          {activeStations.slice(0, 6).map(station => (
+                            <StationCard 
+                              key={station.id} 
+                              station={station} 
+                              onSelect={handleStationSelect} 
+                              isSelected={currentStation?.id === station.id} 
+                              isPlaying={isPlaying} 
+                            />
+                          ))}
+                        </div>
+                      )}
+                      {!isMobile && activeStations.length > 6 && (
                         <button 
                           onClick={() => handleGameSelect(currentGame)}
                           className="mt-4 px-4 py-2 bg-pink-500/20 hover:bg-pink-500/30 border border-pink-500/50 rounded-lg transition-colors text-pink-300"
@@ -610,8 +688,8 @@ export default function Radio() {
   {/* No full-screen overlay; dropdown is anchored to the search input */}
       </div>
       
-      {/* Focus Mode Overlay */}
-      {isFocusMode && currentStation && (
+      {/* Focus Mode Overlay - Desktop only */}
+      {!isMobile && isFocusMode && currentStation && (
         <FocusMode
           currentStation={currentStation}
           currentGame={currentGame}
@@ -632,16 +710,52 @@ export default function Radio() {
         />
       )}
 
-      {/* Mini Player */}
-      {showMiniPlayer && currentStation && (
+      {/* Mini Player - Desktop only when scrolled */}
+      {!isMobile && showMiniPlayer && currentStation && (
         <MiniPlayer
           currentStation={currentStation}
           nowPlaying={nowPlaying}
           isPlaying={isPlaying}
           onTogglePlayPause={togglePlayPause}
-          onOpenFocusMode={() => setIsFocusMode(true)}
+          onOpenFocusMode={handleOpenFocusMode}
           onClose={() => setShowMiniPlayer(false)}
         />
+      )}
+
+      {/* Mobile Bottom Player */}
+      {isMobile && currentStation && !isMobilePlayerExpanded && (
+        <FloatingBottomPlayer
+          currentStation={currentStation}
+          nowPlaying={nowPlaying}
+          isPlaying={isPlaying}
+          onTogglePlayPause={togglePlayPause}
+          onExpand={handleMobilePlayerExpand}
+          currentTime={currentTime}
+          duration={duration}
+        />
+      )}
+
+      {/* Mobile Expanded Player Overlay */}
+      {isMobile && isMobilePlayerExpanded && (
+        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl">
+          <MobileNowPlayingCard
+            currentStation={currentStation}
+            currentGame={currentGame}
+            nowPlaying={nowPlaying}
+            isPlaying={isPlaying}
+            currentTime={currentTime}
+            duration={duration}
+            formatTime={formatTime}
+            onTogglePlayPause={togglePlayPause}
+            onPreviousTrack={goToPreviousTrack}
+            onNextTrack={goToNextTrack}
+            onCollapse={handleMobilePlayerCollapse}
+            volume={volume}
+            isMuted={isMuted}
+            onVolumeChange={handleVolumeChange}
+            onToggleMute={handleToggleMute}
+          />
+        </div>
       )}
       
       <audio ref={audioRef} src={currentStation?.audioUrl} crossOrigin="anonymous"></audio>
@@ -685,6 +799,28 @@ export default function Radio() {
         .custom-scrollbar {
           scrollbar-width: thin;
           scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+        }
+
+        /* Mobile horizontal scrollbar hiding */
+        .scrollbar-hide {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+          display: none;
+        }
+
+        /* Mobile safe area */
+        .pb-safe {
+          padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Better touch targets on mobile */
+        @media (max-width: 768px) {
+          button, [role="button"] {
+            min-height: 44px;
+            min-width: 44px;
+          }
         }
       `}</style>
     </>
