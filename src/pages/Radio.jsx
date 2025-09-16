@@ -17,6 +17,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 export default function Radio() {
   const [gameData] = useState(games);
   const [currentGame, setCurrentGame] = useState(gameData.vcs);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [selectedGameView, setSelectedGameView] = useState(null); // New state for game selection view
   const [currentStation, setCurrentStation] = useState(null);
   const [nowPlaying, setNowPlaying] = useState({ type: '', artist: 'GTA Live Radio', title: 'Select a station to begin' });
@@ -151,6 +152,12 @@ export default function Radio() {
       setIsFocusMode(true);
     }
   };
+
+  // Turn off initial loading after first mount to avoid showing skeletons on dynamic updates
+  useEffect(() => {
+    const t = setTimeout(() => setInitialLoading(false), 600);
+    return () => clearTimeout(t);
+  }, []);
 
   const togglePlayPause = () => {
     if (!currentStation || !audioRef.current) return;
@@ -513,6 +520,7 @@ export default function Radio() {
                       isDisabled={game.id !== 'vcs'} // Only VCS is active for now
                       onSelect={handleGameSelect}
                       isSelected={currentGame.id === game.id && !selectedGameView}
+                      initialLoading={initialLoading}
                     />
                   ))}
                 </div>
@@ -534,7 +542,8 @@ export default function Radio() {
                             onSelect={handleStationSelect} 
                             isSelected={currentStation?.id === station.id} 
                             isPlaying={isPlaying}
-                            size="compact"
+                              size="compact"
+                              initialLoading={initialLoading}
                           />
                           <div className="absolute top-2 left-2 text-xs bg-pink-500/90 backdrop-blur-sm text-white px-1.5 py-0.5 rounded-full z-10">
                             {station.gameName.split(' - ')[1] || station.gameName}
@@ -551,6 +560,7 @@ export default function Radio() {
                             onSelect={handleStationSelect} 
                             isSelected={currentStation?.id === station.id} 
                             isPlaying={isPlaying} 
+                            initialLoading={initialLoading}
                           />
                           <div className="absolute top-2 left-2 text-xs bg-pink-500/90 backdrop-blur-sm text-white px-2 py-1 rounded-full z-10">
                             {station.gameName.split(' - ')[1] || station.gameName}
@@ -584,6 +594,7 @@ export default function Radio() {
                               isPlaying={isPlaying}
                               size="compact"
                               compactMinWidth={104}
+                              initialLoading={initialLoading}
                             />
                           </div>
                         ))}
@@ -620,6 +631,7 @@ export default function Radio() {
                                 isSelected={currentStation?.id === station.id} 
                                 isPlaying={isPlaying}
                                 size="compact"
+                                initialLoading={initialLoading}
                               />
                             </div>
                           ))}
@@ -633,6 +645,7 @@ export default function Radio() {
                               onSelect={handleStationSelect} 
                               isSelected={currentStation?.id === station.id} 
                               isPlaying={isPlaying} 
+                              initialLoading={initialLoading}
                             />
                           ))}
                         </div>

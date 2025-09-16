@@ -1,9 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useIsMobile } from '../hooks/useIsMobile';
+import LoadingSkeleton from './LoadingSkeleton';
 
-const GameCard = ({ game, isDisabled, onSelect, isSelected }) => {
+const GameCard = ({ game, isDisabled, onSelect, isSelected, initialLoading = false }) => {
   const isMobile = useIsMobile();
   const [isMounted, setIsMounted] = useState(false);
+  const [bannerLoaded, setBannerLoaded] = useState(false);
+  const [logoLoaded, setLogoLoaded] = useState(false);
+  const [showSkeleton, setShowSkeleton] = useState(initialLoading);
+  const minDisplayRef = useRef(null);
+
+  const MIN_MS = 5000;
+
+  // If initialLoading is enabled on mount, ensure skeleton stays visible for MIN_MS
+  useEffect(() => {
+    if (!initialLoading) return;
+    setShowSkeleton(true);
+    clearTimeout(minDisplayRef.current);
+    minDisplayRef.current = setTimeout(() => setShowSkeleton(false), MIN_MS);
+    return () => clearTimeout(minDisplayRef.current);
+  }, [initialLoading]);
+
+  useEffect(() => {
+    // Determine required images and their loaded state
+    // Banner is only rendered on mobile, so only require it when `isMobile`.
+    const bannerRequired = isMobile && !!game.banner;
+    const logoRequired = !!game.logo;
+    const bannerOk = bannerRequired ? bannerLoaded : true;
+    const logoOk = logoRequired ? logoLoaded : true;
+    const allLoaded = bannerOk && logoOk;
+
+    // If not in initial loading phase and not all images are ready, don't show skeleton
+    if (!initialLoading && !allLoaded) {
+      setShowSkeleton(false);
+      return;
+    }
+
+    // If any image still loading, show skeleton
+    if (!allLoaded) {
+      setShowSkeleton(true);
+      return;
+    }
+
+    // When all images reported loaded, keep skeleton visible for a minimum time (match StationCard = 5000ms)
+    const MIN_MS = 5000;
+    clearTimeout(minDisplayRef.current);
+    minDisplayRef.current = setTimeout(() => setShowSkeleton(false), MIN_MS);
+
+    return () => clearTimeout(minDisplayRef.current);
+  }, [bannerLoaded, logoLoaded, game.banner, game.logo, initialLoading]);
 
   useEffect(() => {
     // Small delay to prevent initial mount animations
@@ -15,33 +60,40 @@ const GameCard = ({ game, isDisabled, onSelect, isSelected }) => {
     return (
       <div
         className={`relative rounded-xl overflow-hidden border border-white/10 w-[200px] xs:w-[160px] h-[112px] xs:h-[90px] flex-shrink-0 group
-          ${isDisabled ? 'opacity-70 grayscale-[50%]' : 'cursor-pointer hover:border-white/30'} ${isMounted ? 'transition-all duration-300' : ''}`
+          ${isDisabled ? 'opacity-70 grayscale-[50%]' : 'cursor-pointer hover:border-white/30'} ${isMounted ? 'transition-all duration-300' : ''} ${showSkeleton ? 'pointer-events-none select-none' : ''}`
         }
-        onClick={() => !isDisabled && onSelect(game)}
+        onClick={() => { if (showSkeleton) return; if (!isDisabled) onSelect(game); }}
+        aria-disabled={showSkeleton || isDisabled}
       >
-        {/* Pink Active Dot */}
-        {isSelected && (
+        {/* Pink Active Dot (hidden while skeleton shows) */}
+        {!showSkeleton && isSelected && (
           <div className="absolute top-2 left-2 xs:top-1.5 xs:left-1.5 w-3 h-3 xs:w-2.5 xs:h-2.5 bg-pink-500 rounded-full border-2 border-white/20 z-20 animate-subtle-blink"></div>
         )}
         
         {/* Background Banner */}
-        <img src={game.banner} alt={game.name} className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-90" />
+        <div className="absolute inset-0 w-full h-full">
+          {!bannerLoaded && <LoadingSkeleton className="w-full h-full" />}
+          <img src={game.banner} alt={game.name} className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${bannerLoaded ? 'opacity-100' : 'opacity-0'}`} onLoad={() => setBannerLoaded(true)} onError={() => setBannerLoaded(true)} />
+        </div>
         
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+        {/* Content (hidden while skeleton shows) */}
+        {!showSkeleton && (
+          <div className="relative w-full h-full flex flex-col justify-end p-3 xs:p-2">
+            {!logoLoaded && <LoadingSkeleton className="max-h-10 xs:max-h-8 max-w-[140px] xs:max-w-[100px] object-contain self-start" rounded={false} />}
+            <img src={game.logo} alt={`${game.name} logo`} className={`max-h-10 xs:max-h-8 max-w-[140px] xs:max-w-[100px] object-contain self-start drop-shadow-lg ${logoLoaded ? 'opacity-100' : 'opacity-0'} transition-opacity duration-200`} onLoad={() => setLogoLoaded(true)} onError={() => setLogoLoaded(true)} />
+          </div>
+        )}
         
-        {/* Content */}
-        <div className="relative w-full h-full flex flex-col justify-end p-3 xs:p-2">
-          <img src={game.logo} alt={`${game.name} logo`} className="max-h-10 xs:max-h-8 max-w-[140px] xs:max-w-[100px] object-contain self-start drop-shadow-lg" />
-        </div>
-        
-        {/* Status Badge */}
-        {isDisabled && (
+        {/* Status Badge (hidden while skeleton shows) */}
+        {!showSkeleton && isDisabled && (
           <div className="absolute top-2 right-2 xs:top-1 xs:right-1 text-xs xs:text-[10px] bg-black/60 backdrop-blur-md text-gray-200 px-2 py-1 xs:px-1.5 xs:py-0.5 rounded-full z-10 font-medium">
             SOON
           </div>
         )}
-         {!isDisabled && (
+         {!showSkeleton && !isDisabled && (
           <div className="absolute top-2 right-2 xs:top-1 xs:right-1 text-xs xs:text-[10px] bg-pink-600/80 backdrop-blur-md text-white px-2 py-1 xs:px-1.5 xs:py-0.5 rounded-full z-10 font-bold">
             PLAY
           </div>
@@ -67,46 +119,59 @@ const GameCard = ({ game, isDisabled, onSelect, isSelected }) => {
   
   return (
     <div 
-      className={`relative rounded-lg aspect-square flex items-center justify-center cursor-pointer overflow-hidden border border-white/10 ${themeColor}
+      className={`relative rounded-lg aspect-square flex items-center justify-center overflow-hidden border border-white/10 ${themeColor}
         ${isSelected ? '' : 'hover:border-white/20'} 
-        ${isMobile ? 'p-2' : 'p-4'} ${isMounted ? 'transition-all duration-300' : ''}`}
-      onClick={() => !isDisabled && onSelect(game)}
+        ${isMobile ? 'p-2' : 'p-4'} ${isMounted ? 'transition-all duration-300' : ''} ${showSkeleton ? 'pointer-events-none select-none' : 'cursor-pointer'}`}
+      onClick={() => { if (showSkeleton || isDisabled) return; onSelect(game); }}
+      aria-disabled={showSkeleton || isDisabled}
     >
-    {/* Pink Active Dot */}
-    {isSelected && (
+    {/* Pink Active Dot (hidden while skeleton shows) */}
+    {isSelected && !showSkeleton && (
       <div className="absolute top-2 left-2 w-3 h-3 bg-pink-500 rounded-full border-2 border-white/20 z-20 animate-subtle-blink"></div>
     )}
-    
-    {/* Game logo */}
-    {game.logo ? (
-      <img 
-        src={game.logo} 
-        alt={game.name}
-        className={`max-w-full max-h-full object-contain
-          ${isDisabled ? 'opacity-50 grayscale' : 'opacity-90'}`}
-      />
-    ) : (
-      /* Fallback for games without logo */
-      <div className={`rounded-full flex items-center justify-center font-bold
-        ${isMobile ? 'w-12 h-12 text-lg' : 'w-16 h-16 text-2xl'}
-        ${isSelected ? 'bg-pink-500/30 text-pink-300' : 
-          isDisabled ? 'bg-white/10 text-gray-400' : 'bg-white/20 text-white'}`}>
-        {game.name.split(' ').pop().charAt(0)}
+
+    {/* Full-card skeleton overlay (covers padding, badges and content) */}
+    {showSkeleton && (
+      <div className="absolute inset-0 z-40 pointer-events-none">
+        {/* Use an opaque background so the skeleton fully covers the card */}
+        <LoadingSkeleton className="w-full h-full rounded-lg" bgClass="bg-gray-900" />
       </div>
     )}
-    
-    {/* Status badges */}
-    {isDisabled && (
+
+    {/* Game logo (under the skeleton while loading) */}
+    <div className="w-full h-full flex items-center justify-center relative">
+      {game.logo ? (
+        <img 
+          src={game.logo} 
+          alt={game.name}
+          className={`max-w-full max-h-full object-contain relative z-10
+            ${isDisabled ? 'opacity-50 grayscale' : 'opacity-90'} ${showSkeleton ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200 ${showSkeleton && !isMobile ? 'invisible' : 'visible'}`}
+          onLoad={() => setLogoLoaded(true)}
+          onError={() => setLogoLoaded(true)}
+        />
+      ) : (
+        /* Fallback for games without logo */
+        <div className={`rounded-full flex items-center justify-center font-bold relative z-10
+          ${isMobile ? 'w-12 h-12 text-lg' : 'w-16 h-16 text-2xl'}
+          ${isSelected ? 'bg-pink-500/30 text-pink-300' : 
+            isDisabled ? 'bg-white/10 text-gray-400' : 'bg-white/20 text-white'}`}>
+          {game.name.split(' ').pop().charAt(0)}
+        </div>
+      )}
+    </div>
+
+    {/* Status badges (hidden while skeleton shows) */}
+    {!showSkeleton && isDisabled && (
       <div className={`absolute top-2 right-2 text-xs bg-gray-700/90 backdrop-blur-sm text-gray-300 px-2 py-1 rounded-full z-10 ${isMobile ? 'text-[10px] px-1.5 py-0.5' : ''}`}>
         SOON
       </div>
     )}
-    {!isDisabled && !isSelected && (
+    {!showSkeleton && !isDisabled && !isSelected && (
       <div className={`absolute top-2 right-2 text-xs bg-pink-600/90 backdrop-blur-sm text-white px-2 py-1 rounded-full z-10 ${isMobile ? 'text-[10px] px-1.5 py-0.5' : ''}`}>
         ACTIVE
       </div>
     )}
-    {isSelected && !isMobile && (
+    {isSelected && !isMobile && !showSkeleton && (
       <div className="absolute top-2 right-2 text-xs bg-pink-500/90 backdrop-blur-sm text-white px-2 py-1 rounded-full z-10">
         SELECTED
       </div>
