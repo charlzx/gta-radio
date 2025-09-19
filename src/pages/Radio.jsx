@@ -222,6 +222,8 @@ export default function Radio() {
       audioElement.addEventListener('timeupdate', updateNowPlaying);
       audioElement.addEventListener('loadedmetadata', updateDuration);
       audioElement.addEventListener('durationchange', updateDuration);
+      // Run immediately to populate Now Playing as soon as station/audio is set
+      updateNowPlaying();
     }
     
     return () => { 
