@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 export function useRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = {}) {
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.8);
+  const [volume, setVolume] = useState(1.0);
   const [isMuted, setIsMuted] = useState(false);
   const epochMsRef = useRef(new Date(radioEpoch).getTime());
   const activeDurationRef = useRef(0);

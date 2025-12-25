@@ -157,24 +157,22 @@ const FocusMode = ({
             <div className="flex items-center gap-3">
               <button
                 onClick={onPreviousTrack}
-                className="rounded-full bg-transparent transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
+                className="rounded-full bg-transparent text-white transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
                 aria-label="Previous"
               >
-                <SkipBack size={40} fill="white" />
+                <SkipBack size={40} strokeWidth={2} fill="white" />
               </button>
               <PlayPauseButton isPlaying={isPlaying} onToggle={onTogglePlayPause} size="lg" />
               <button
                 onClick={onNextTrack}
-                className="rounded-full bg-transparent transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
+                className="rounded-full bg-transparent text-white transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
                 aria-label="Next"
               >
-                <SkipForward size={40} fill="white" />
+                <SkipForward size={40} strokeWidth={2} fill="white" />
               </button>
             </div>
             {/* Volume */}
-            <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
-              <Volume2 size={16} className="text-white/70" />
-              <div className="text-xs text-gray-300 w-12 text-right">{isMuted ? 'Muted' : `${Math.round((volume ?? 0) * 100)}%`}</div>
+            <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3" style={{ minWidth: '240px' }}>
               <VolumeControl
                 volume={volume ?? 0}
                 isMuted={!!isMuted}

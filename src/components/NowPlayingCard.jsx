@@ -63,12 +63,12 @@ const NowPlayingCard = ({
             </button>
           </div>
           <div className="mt-3 flex items-center justify-center gap-3 opacity-50">
-            <button className="rounded-full bg-transparent" disabled>
-              <SkipBack size={32} fill="white" />
+            <button className="rounded-full bg-transparent text-white" disabled>
+              <SkipBack size={32} strokeWidth={2} fill="white" />
             </button>
             <PlayPauseButton isPlaying={false} onToggle={() => {}} />
-            <button className="rounded-full bg-transparent" disabled>
-              <SkipForward size={32} fill="white" />
+            <button className="rounded-full bg-transparent text-white" disabled>
+              <SkipForward size={32} strokeWidth={2} fill="white" />
             </button>
           </div>
         </div>
@@ -135,18 +135,18 @@ const NowPlayingCard = ({
         <div className="mt-3 flex items-center justify-center gap-3">
           <button
             onClick={onPreviousTrack}
-            className="rounded-full bg-transparent transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
+            className="rounded-full bg-transparent text-white transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
             aria-label="Previous"
           >
-            <SkipBack size={32} fill="white" />
+            <SkipBack size={32} strokeWidth={2} fill="white" />
           </button>
           <PlayPauseButton isPlaying={isPlaying} onToggle={onTogglePlayPause} />
           <button
             onClick={onNextTrack}
-            className="rounded-full bg-transparent transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
+            className="rounded-full bg-transparent text-white transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
             aria-label="Next"
           >
-            <SkipForward size={32} fill="white" />
+            <SkipForward size={32} strokeWidth={2} fill="white" />
           </button>
         </div>
       </div>

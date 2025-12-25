@@ -50,6 +50,24 @@ export default function Radio() {
       setSelectedGameView(null);
     }
   }, [searchQuery]);
+  
+  // Handle browser back/forward navigation
+  useEffect(() => {
+    const handlePopState = (event) => {
+      if (event.state?.view === 'main' || !event.state) {
+        setSelectedGameView(null);
+      } else if (event.state?.view === 'game' && event.state?.gameId) {
+        const game = Object.values(gameData).find(g => g.id === event.state.gameId);
+        if (game) {
+          setSelectedGameView(game);
+          setCurrentGame(game);
+        }
+      }
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [gameData]);
 
   // Helper function to format time (mm:ss)
   const formatTime = (seconds) => {
@@ -110,11 +128,24 @@ export default function Radio() {
 
   const handleGameSelect = (game) => {
     setSelectedGameView(game);
+    
+    // Only reset station if switching to a different game than the one currently playing
+    if (currentStation && currentGame.id !== game.id) {
+      pause();
+      setCurrentStation(null);
+      setNowPlaying({ type: '', artist: 'GTA Live Radio', title: `Select a ${game.name} station` });
+    }
+    
     setCurrentGame(game);
-    // Reset station when switching games
-  pause();
-    setCurrentStation(null);
-    setNowPlaying({ type: '', artist: 'GTA Live Radio', title: `Select a ${game.name} station` });
+    
+    // Push state to browser history for proper back button navigation
+    window.history.pushState({ view: 'game', gameId: game.id }, '', `#${game.id}`);
+  };
+  
+  const handleBackToMain = () => {
+    setSelectedGameView(null);
+    // Push state for main view
+    window.history.pushState({ view: 'main' }, '', '#');
   };
 
   const handleStationSelect = (station) => {
@@ -128,11 +159,24 @@ export default function Radio() {
       setCurrentGame(station.game);
     }
     setCurrentStation(station);
-    setNowPlaying({ type: 'Info', artist: station.name, title: 'Press Play to Sync' });
+    setNowPlaying({ type: 'Info', artist: station.name, title: 'Loading...' });
     addToRecentlyPlayed(station);
-    setTimeout(() => {
-      if(audioRef.current) togglePlayPause();
-    }, 100);
+    
+    // Wait for the audio to be ready before playing
+    const handleCanPlay = () => {
+      if (audioRef.current) {
+        playAtEpoch(station.duration);
+      }
+      audioRef.current?.removeEventListener('canplay', handleCanPlay);
+    };
+    
+    if (audioRef.current) {
+      audioRef.current.addEventListener('canplay', handleCanPlay);
+      // Fallback timeout in case canplay doesn't fire
+      setTimeout(() => {
+        audioRef.current?.removeEventListener('canplay', handleCanPlay);
+      }, 5000);
+    }
   };
 
   // Mobile-specific handlers
@@ -213,6 +257,13 @@ export default function Radio() {
     setActiveDuration(currentStation.duration);
       }
     };
+    
+    const handleEnded = () => {
+      // Loop the audio when it ends
+      if (audioElement && currentStation && isPlaying) {
+        playAtEpoch(currentStation.duration);
+      }
+    };
 
     if (audioElement) {
       // Set initial volume and mute state
@@ -222,6 +273,7 @@ export default function Radio() {
       audioElement.addEventListener('timeupdate', updateNowPlaying);
       audioElement.addEventListener('loadedmetadata', updateDuration);
       audioElement.addEventListener('durationchange', updateDuration);
+      audioElement.addEventListener('ended', handleEnded);
       // Run immediately to populate Now Playing as soon as station/audio is set
       updateNowPlaying();
     }
@@ -231,9 +283,10 @@ export default function Radio() {
         audioElement.removeEventListener('timeupdate', updateNowPlaying);
         audioElement.removeEventListener('loadedmetadata', updateDuration);
         audioElement.removeEventListener('durationchange', updateDuration);
+        audioElement.removeEventListener('ended', handleEnded);
       }
     };
-  }, [currentStation, nowPlaying.title, volume, isMuted, setActiveDuration]);
+  }, [currentStation, nowPlaying.title, volume, isMuted, setActiveDuration, isPlaying, playAtEpoch]);
 
   // Mini player scroll effect
   useEffect(() => {
@@ -434,7 +487,7 @@ export default function Radio() {
             <>
               <header className={`flex items-center gap-3 mb-4 ${isMobile ? 'px-0' : ''}`}>
                 <button 
-                  onClick={() => setSelectedGameView(null)}
+                  onClick={handleBackToMain}
                   className="p-0 bg-transparent hover:bg-white/20 rounded-full transition-all duration-200 border-0 sm:bg-white/10 sm:border sm:border-white/10 hover:border-white/20 min-w-[44px] min-h-[44px] flex items-center justify-center"
                   aria-label="Back"
                 >

@@ -113,18 +113,18 @@ const MobileNowPlayingCard = ({
       <div className="flex items-center justify-center gap-6 mb-6">
         <button
           onClick={onPreviousTrack}
-          className="rounded-full bg-transparent transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
+          className="rounded-full bg-transparent text-white transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
           aria-label="Previous"
         >
-          <SkipBack size={40} fill="white" />
+          <SkipBack size={40} strokeWidth={2} fill="white" />
         </button>
         <PlayPauseButton isPlaying={isPlaying} onToggle={onTogglePlayPause} size="lg" />
         <button
           onClick={onNextTrack}
-          className="rounded-full bg-transparent transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
+          className="rounded-full bg-transparent text-white transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
           aria-label="Next"
         >
-          <SkipForward size={40} fill="white" />
+          <SkipForward size={40} strokeWidth={2} fill="white" />
         </button>
       </div>
 
