@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { FaStepBackward, FaStepForward, FaChevronDown } from 'react-icons/fa';
+import { SkipBack, SkipForward, ChevronDown } from 'lucide-react';
 import PlayPauseButton from './PlayPauseButton';
 import VolumeControl from './VolumeControl';
 
@@ -48,7 +48,7 @@ const MobileNowPlayingCard = ({
             className="p-3 rounded-full bg-white/0 hover:bg-white/30 text-white shadow-md transition-colors"
             aria-label="Collapse player"
           >
-            <FaChevronDown className="w-6 h-6" />
+            <ChevronDown size={24} />
           </button>
         </div>
         <div className="text-center py-8">
@@ -69,7 +69,7 @@ const MobileNowPlayingCard = ({
           className="p-3 rounded-full bg-white/0 hover:bg-white/30 text-white shadow-md transition-colors"
           aria-label="Collapse player"
         >
-          <FaChevronDown className="w-6 h-6" />
+          <ChevronDown size={24} />
         </button>
       </div>
 
@@ -113,18 +113,18 @@ const MobileNowPlayingCard = ({
       <div className="flex items-center justify-center gap-6 mb-6">
         <button
           onClick={onPreviousTrack}
-          className="p-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 transition-colors"
+          className="rounded-full bg-transparent transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
           aria-label="Previous"
         >
-          <FaStepBackward className="w-5 h-5" />
+          <SkipBack size={40} fill="white" />
         </button>
         <PlayPauseButton isPlaying={isPlaying} onToggle={onTogglePlayPause} size="lg" />
         <button
           onClick={onNextTrack}
-          className="p-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 transition-colors"
+          className="rounded-full bg-transparent transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
           aria-label="Next"
         >
-          <FaStepForward className="w-5 h-5" />
+          <SkipForward size={40} fill="white" />
         </button>
       </div>
 

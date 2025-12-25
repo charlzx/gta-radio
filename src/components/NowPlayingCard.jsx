@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { FaExpand, FaStepBackward, FaStepForward } from 'react-icons/fa';
+import { Maximize2, SkipBack, SkipForward } from 'lucide-react';
 import PlayPauseButton from './PlayPauseButton';
 import VolumeControl from './VolumeControl';
 
@@ -63,12 +63,12 @@ const NowPlayingCard = ({
             </button>
           </div>
           <div className="mt-3 flex items-center justify-center gap-3 opacity-50">
-            <button className="p-2 rounded-full bg-white/10" disabled>
-              <FaStepBackward className="w-4 h-4" />
+            <button className="rounded-full bg-transparent" disabled>
+              <SkipBack size={32} fill="white" />
             </button>
             <PlayPauseButton isPlaying={false} onToggle={() => {}} />
-            <button className="p-2 rounded-full bg-white/10" disabled>
-              <FaStepForward className="w-4 h-4" />
+            <button className="rounded-full bg-transparent" disabled>
+              <SkipForward size={32} fill="white" />
             </button>
           </div>
         </div>
@@ -96,7 +96,7 @@ const NowPlayingCard = ({
           className="absolute top-3 right-3 p-2 bg-white/10 hover:bg-white/20 rounded-full border border-white/10 transition-colors"
           aria-label="Open focus mode"
         >
-          <FaExpand className="w-4 h-4" />
+          <Maximize2 size={16} />
         </button>
         <div className="flex items-center gap-3 pr-12">
           <img
@@ -135,18 +135,18 @@ const NowPlayingCard = ({
         <div className="mt-3 flex items-center justify-center gap-3">
           <button
             onClick={onPreviousTrack}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 transition-colors"
+            className="rounded-full bg-transparent transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
             aria-label="Previous"
           >
-            <FaStepBackward className="w-4 h-4" />
+            <SkipBack size={32} fill="white" />
           </button>
           <PlayPauseButton isPlaying={isPlaying} onToggle={onTogglePlayPause} />
           <button
             onClick={onNextTrack}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 transition-colors"
+            className="rounded-full bg-transparent transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
             aria-label="Next"
           >
-            <FaStepForward className="w-4 h-4" />
+            <SkipForward size={32} fill="white" />
           </button>
         </div>
       </div>

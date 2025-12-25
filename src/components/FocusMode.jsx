@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { FaStepBackward, FaStepForward, FaPowerOff, FaVolumeUp, FaBroadcastTower } from 'react-icons/fa';
+import { SkipBack, SkipForward, Power, Volume2, Radio } from 'lucide-react';
 import PlayPauseButton from './PlayPauseButton';
 import VolumeControl from './VolumeControl';
 
@@ -71,14 +71,14 @@ const FocusMode = ({
           className="absolute top-4 right-4 z-40 p-3 rounded-full bg-white/10 hover:bg-red-600/80 border border-white/10 text-white shadow-lg transition-colors"
           aria-label="Exit focus mode"
         >
-          <FaPowerOff className="w-5 h-5" />
+          <Power size={20} />
         </button>
 
         {/* Main display */}
         <div className="flex-1 w-full flex flex-col items-center justify-center px-4 md:px-8">
           {/* Station info row */}
           <div className="flex items-center gap-3 mb-2">
-            <FaBroadcastTower className="w-5 h-5 text-pink-400 animate-pulse" />
+            <Radio size={20} className="text-pink-400 animate-pulse" />
             <span className="text-xs md:text-sm font-bold text-pink-400 uppercase tracking-widest">LIVE</span>
             <span className="text-white/70 text-xs md:text-sm">{currentGame.name}</span>
             <span className="opacity-40">/</span>
@@ -157,23 +157,23 @@ const FocusMode = ({
             <div className="flex items-center gap-3">
               <button
                 onClick={onPreviousTrack}
-                className="p-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white"
+                className="rounded-full bg-transparent transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
                 aria-label="Previous"
               >
-                <FaStepBackward className="w-5 h-5" />
+                <SkipBack size={40} fill="white" />
               </button>
               <PlayPauseButton isPlaying={isPlaying} onToggle={onTogglePlayPause} size="lg" />
               <button
                 onClick={onNextTrack}
-                className="p-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white"
+                className="rounded-full bg-transparent transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
                 aria-label="Next"
               >
-                <FaStepForward className="w-5 h-5" />
+                <SkipForward size={40} fill="white" />
               </button>
             </div>
             {/* Volume */}
             <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
-              <FaVolumeUp className="w-4 h-4 text-white/70" />
+              <Volume2 size={16} className="text-white/70" />
               <div className="text-xs text-gray-300 w-12 text-right">{isMuted ? 'Muted' : `${Math.round((volume ?? 0) * 100)}%`}</div>
               <VolumeControl
                 volume={volume ?? 0}

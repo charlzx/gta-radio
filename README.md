@@ -8,38 +8,38 @@ A modern web application that recreates the authentic Grand Theft Auto radio exp
 ![Tailwind](https://img.shields.io/badge/Tailwind%20CSS-4-cyan)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-## ✨ Features
+## Features
 
-### 🎵 **Core Radio Experience**
-- **🔴 Live Synchronized Playback** - All users hear the same content at the same time
-- **🎵 Real-time Track Detection** - Shows current song/DJ segments with timestamps
-- **🎛️ Volume Control** - Slider and mute controls with persistent settings
-- **⏯️ Player Controls** - Next/previous track navigation with multiple button sizes
-- **📺 Dynamic Title Updates** - Browser tab title changes based on what's currently playing
+### **Core Radio Experience**
+- **Live Synchronized Playback** - All users hear the same content at the same time
+- **Real-time Track Detection** - Shows current song/DJ segments with timestamps
+- **Volume Control** - Slider and mute controls with persistent settings
+- **Player Controls** - Next/previous track navigation with multiple button sizes
+- **Dynamic Title Updates** - Browser tab title changes based on what's currently playing
 
-### 🎯 **User Experience**
-- **🔍 Real-time Search** - Search stations by name with instant filtering
-- **❤️ Favorites System** - Save and manage favorite radio stations with localStorage persistence
-- **📻 Recently Played** - Track and revisit your last 5 played stations
-- **🎵 Mini Player** - Persistent player that appears when scrolling
-- **🎯 Focus Mode** - Fullscreen immersive listening experience
-- **🎮 Smart Station Display** - Shows only active stations in quick access, with "Coming Soon" for others
+### **User Experience**
+- **Real-time Search** - Search stations by name with instant filtering
+- **Favorites System** - Save and manage favorite radio stations with localStorage persistence
+- **Recently Played** - Track and revisit your last 5 played stations
+- **Mini Player** - Persistent player that appears when scrolling
+- **Focus Mode** - Fullscreen immersive listening experience
+- **Smart Station Display** - Shows only active stations in quick access, with "Coming Soon" for others
 
-### 🎨 **Modern Interface**
-- **📱 Responsive Design** - Seamless experience on desktop, tablet, and mobile
-- **🎨 Glassmorphism UI** - Modern frosted glass design with smooth animations and enhanced overlays
-- **🎮 Game Navigation** - Browse between different GTA games with banner backgrounds and smart fallbacks
-- **📋 Spotify-style Lists** - Familiar interface for browsing stations
-- **🖼️ Banner Integration** - “Choose your era” cards now use game banners as full background images with subtle overlays
-- **🟪 Particle Backdrop** - Subtle, animated particles with parallax for a living dark background (respects reduced motion)
-- **📱 Mobile Polish** - Tighter section spacing on phones, responsive grids, improved footer layout
+### **Modern Interface**
+- **Responsive Design** - Seamless experience on desktop, tablet, and mobile
+- **Glassmorphism UI** - Modern frosted glass design with smooth animations and enhanced overlays
+- **Game Navigation** - Browse between different GTA games with banner backgrounds and smart fallbacks
+- **Spotify-style Lists** - Familiar interface for browsing stations
+- **Banner Integration** - Choose your era cards now use game banners as full background images with subtle overlays
+- **Particle Backdrop** - Subtle, animated particles with parallax for a living dark background (respects reduced motion)
+- ** Mobile Polish** - Tighter section spacing on phones, responsive grids, improved footer layout
 
-### 🏗️ **Technical Excellence**
-- **� Modular Architecture** - Clean component separation and reusability
-- **⚡ Performance Optimized** - Efficient state management and rendering
-- **🔧 Developer Experience** - Modern tooling with hot reloading and linting
+### **Technical Excellence**
+- ** Modular Architecture** - Clean component separation and reusability
+- **Performance Optimized** - Efficient state management and rendering
+- **Developer Experience** - Modern tooling with hot reloading and linting
 
-## 🚀 Quick Start
+## Quick Start
 
 ### **Prerequisites**
 - Node.js 18+ and npm (or yarn/pnpm)
@@ -80,7 +80,7 @@ npx vercel --prod
 3. **Audio Playback** - Click any station to start synchronized streaming
 4. **Features** - Try search, favorites, focus mode, and mobile layouts
 
-## 🏗️ Architecture
+## Architecture
 
 ### Synchronized Radio System
 The app uses a "radio epoch" timestamp to ensure all users hear synchronized content:
@@ -96,8 +96,8 @@ The browser tab title updates in real-time based on the current playback state:
 
 ```javascript
 // Examples of dynamic title formats:
-"♫ Hall & Oates - Out of Touch | Flash FM"     // Currently playing song
-"🎙️ Welcome to Flash | Flash FM"               // DJ segment
+" Hall & Oates - Out of Touch | Flash FM"     // Currently playing song
+" Welcome to Flash | Flash FM"               // DJ segment
 "Flash FM - GTA Radio"                          // Station selected but paused
 "GTA Radio"                                     // Default state
 ```
@@ -125,7 +125,7 @@ import vcsLogo from '../assets/games/vcs/vcs-logo.png';
 import vcsBanner from '../assets/games/vcs/vcs-banner.png';
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 gta-radio/
@@ -186,7 +186,7 @@ gta-radio/
 └── vite.config.js       # Vite configuration
 ```
 
-## 🎵 Adding Radio Stations
+## Adding Radio Stations
 
 ### 1. Organize Game Assets
 Add assets to the appropriate game folder:
@@ -238,13 +238,13 @@ export const games = {
 
 ### 4. Component Integration
 New stations automatically appear in:
-- ✅ Game selection interface
-- ✅ Station grid and list views
-- ✅ Search and filtering
-- ✅ Recently played tracking
-- ✅ Favorites system
+- Game selection interface
+- Station grid and list views
+- Search and filtering
+- Recently played tracking
+- Favorites system
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### **Core Framework**
 - **React 19** - Latest React with modern hooks, enhanced performance, and improved concurrent features
@@ -268,7 +268,7 @@ New stations automatically appear in:
 - **Local Storage** - Persistent user preferences for favorites, volume, and recently played stations
 - **Radio Epoch System** - Synchronized playback timing ensuring all users hear identical content
 
-## 🎨 Design System
+## Design System
 
 ### Glassmorphism Components
 - **Glass panels**: `bg-white/15 backdrop-blur-xl border border-white/20`
@@ -292,7 +292,7 @@ New stations automatically appear in:
 └── Floating Elements (Mini Player, Focus Mode)
 ```
 
-## 🔧 Development
+## Development
 
 ### **Available Scripts**
 ```bash
@@ -308,11 +308,11 @@ npm run dev        # Start developing immediately
 ```
 
 ### **Development Features**
-- **⚡ Hot Module Replacement** - Instant updates without losing application state
-- **🔍 Source Maps** - Accurate debugging with original source code references
-- **📱 Mobile Testing** - Responsive design testing across device sizes
-- **🎨 Live CSS Updates** - Real-time Tailwind class changes without page refresh
-- **🔧 ESLint Integration** - Automatic code quality checks with React 19 rules
+- **Hot Module Replacement** - Instant updates without losing application state
+- **Source Maps** - Accurate debugging with original source code references
+- **Mobile Testing** - Responsive design testing across device sizes
+- **Live CSS Updates** - Real-time Tailwind class changes without page refresh
+- **ESLint Integration** - Automatic code quality checks with React 19 rules
 
 ### **Local Development Tips**
 - Use browser dev tools to test audio synchronization
@@ -325,11 +325,11 @@ npm run dev        # Start developing immediately
 - `@tailwindcss/vite` - Tailwind CSS integration with Vite
 - Modern ESLint configuration with React 19 support and best practices
 
-## 📸 Screenshots
+## Screenshots
 
 *Coming soon - Screenshots of the modern interface, game selection, and player controls*
 
-## 🎮 Currently Available
+## Currently Available
 
 ### **Vice City Stories (Fully Implemented - 9 Stations)**
 - **Flash FM** - Classic hits and upbeat tracks with Hall & Oates, Out of Touch
@@ -351,7 +351,7 @@ npm run dev        # Start developing immediately
 
 *Each game has dedicated asset folders with logos, banners, and backgrounds ready for quick implementation*
 
-## 🚧 Recent Updates
+## Recent Updates
 
 - Homepage
   - Animated particle background with slow parallax drift
@@ -364,27 +364,27 @@ npm run dev        # Start developing immediately
   - Game cards switched to square logo tiles with theme colors
   - Focus Mode background made fully opaque
 
-## 🚧 Roadmap
+## Roadmap
 
-### 🎯 **Current Features (Implemented)**
-- ✅ Synchronized radio playback across users
-- ✅ Volume control with mute functionality
-- ✅ Real-time search and filtering
-- ✅ Favorites system with localStorage persistence
-- ✅ Recently played tracking
-- ✅ Mini player with scroll detection
-- ✅ Focus mode for immersive experience
-- ✅ Spotify-style station navigation
-- ✅ Modular component architecture
-- ✅ Mobile-responsive design
-- ✅ Dynamic browser title updates based on current track
-- ✅ Smart station display (active stations only in quick access)
-- ✅ Banner integration with dark overlays for game cards
-- ✅ Local asset management for logos and banners
-- ✅ Enhanced glassmorphism UI with gradient overlays
-- ✅ Organized asset structure by game for scalability
+### **Current Features (Implemented)**
+- Synchronized radio playback across users
+- Volume control with mute functionality
+- Real-time search and filtering
+- Favorites system with localStorage persistence
+- Recently played tracking
+- Mini player with scroll detection
+- Focus mode for immersive experience
+- Spotify-style station navigation
+- Modular component architecture
+- Mobile-responsive design
+- Dynamic browser title updates based on current track
+- Smart station display (active stations only in quick access)
+- Banner integration with dark overlays for game cards
+- Local asset management for logos and banners
+- Enhanced glassmorphism UI with gradient overlays
+- Organized asset structure by game for scalability
 
-### 🔮 **Upcoming Features**
+### **Upcoming Features**
 - [ ] **Enhanced Audio Features**
   - [ ] Crossfade transitions between tracks
   - [ ] Audio quality selection
@@ -393,7 +393,7 @@ npm run dev        # Start developing immediately
   - [ ] GTA V radio stations  
   - [ ] GTA III classic stations
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions to make GTA Radio even better! Here's how you can help:
 
@@ -412,12 +412,12 @@ We welcome contributions to make GTA Radio even better! Here's how you can help:
 - Update documentation for new features
 
 ### **Types of Contributions**
-- 🎵 **New Radio Stations** - Add stations with proper tracklist data
-- 🎮 **Game Support** - Implement new GTA game radio collections  
-- 🐛 **Bug Fixes** - Fix issues with audio, UI, or synchronization
-- ✨ **Feature Enhancements** - Improve existing functionality
-- 📱 **Mobile Improvements** - Enhance mobile user experience
-- 🎨 **UI/UX Improvements** - Refine design and user interactions
+- **New Radio Stations** - Add stations with proper tracklist data
+- **Game Support** - Implement new GTA game radio collections  
+- **Bug Fixes** - Fix issues with audio, UI, or synchronization
+- **Feature Enhancements** - Improve existing functionality
+- **Mobile Improvements** - Enhance mobile user experience
+- **UI/UX Improvements** - Refine design and user interactions
 
 ### **Submission Process**
 1. **Commit** changes: `git commit -m 'feat: add amazing feature'`
@@ -425,22 +425,22 @@ We welcome contributions to make GTA Radio even better! Here's how you can help:
 3. **Create** a Pull Request with clear description
 4. **Wait** for review and address any feedback
 
-## 📜 License
+## License
 
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ### **Usage Rights**
-- ✅ Commercial use
-- ✅ Modification  
-- ✅ Distribution
-- ✅ Private use
+- Commercial use
+- Modification  
+- Distribution
+- Private use
 
 *Attribution is appreciated but not required.*
 
-## 🎮 Credits & Acknowledgments
+## Credits & Acknowledgments
 
 ### **Game Content**
-- **Grand Theft Auto Series** © Rockstar Games
+- **Grand Theft Auto Series**  Rockstar Games
 - This is a fan-made educational project celebrating the iconic radio experiences
 - No copyrighted audio content is distributed with this application
 - Users must provide their own legally obtained audio files
@@ -458,7 +458,7 @@ Special thanks to all GTA fans who inspired this project and everyone who contri
 ---
 
 <div align="center">
-<strong>Built with ❤️ for GTA Radio fans worldwide</strong>
+<strong>Built with love for GTA Radio fans worldwide</strong>
 <br>
 <em>Relive the nostalgia, one station at a time</em>
 </div>

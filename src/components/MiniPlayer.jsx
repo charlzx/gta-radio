@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaExpand, FaTimes } from 'react-icons/fa';
+import { Maximize2, X } from 'lucide-react';
 import PlayPauseButton from './PlayPauseButton';
 
 const MiniPlayer = ({ 
@@ -39,13 +39,13 @@ const MiniPlayer = ({
             onClick={onExpand}
             className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
           >
-            <FaExpand className="w-4 h-4" />
+            <Maximize2 size={16} />
           </button>
           <button 
             onClick={onClose}
             className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
           >
-            <FaTimes className="w-4 h-4" />
+            <X size={16} />
           </button>
         </div>
       </div>
