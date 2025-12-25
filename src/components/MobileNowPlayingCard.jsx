@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { SkipBack, SkipForward, ChevronDown } from 'lucide-react';
+import { SkipBack, SkipForward, ChevronDown, List } from 'lucide-react';
 import PlayPauseButton from './PlayPauseButton';
 import VolumeControl from './VolumeControl';
 
@@ -21,6 +21,8 @@ const MobileNowPlayingCard = ({
   onToggleMute,
   isSynced,
   onGoLive,
+  onOpenPlaylist,
+  onTrackClick,
 }) => {
   const progressPct = useMemo(() => {
     if (!duration || duration <= 0) return 0;
@@ -142,18 +144,29 @@ const MobileNowPlayingCard = ({
 
       {/* Volume Control */}
       <div className="mb-8">
-        <div className="flex items-center mb-3">
-          <div className="text-sm text-gray-300 font-medium mr-2">Volume</div>
-          <div className="text-xs text-gray-400">
-            {isMuted ? 'Muted' : `${Math.round(volume * 100)}%`}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center">
+            <div className="text-sm text-gray-300 font-medium mr-2">Volume</div>
+            <div className="text-xs text-gray-400">
+              {isMuted ? 'Muted' : `${Math.round(volume * 100)}%`}
+            </div>
           </div>
+          <button
+            onClick={onOpenPlaylist}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            aria-label="View playlist"
+          >
+            <List size={20} />
+          </button>
         </div>
-        <VolumeControl
-          volume={volume}
-          isMuted={isMuted}
-          onVolumeChange={onVolumeChange}
-          onToggleMute={onToggleMute}
-        />
+        <div className="pr-2">
+          <VolumeControl
+            volume={volume}
+            isMuted={isMuted}
+            onVolumeChange={onVolumeChange}
+            onToggleMute={onToggleMute}
+          />
+        </div>
       </div>
 
       {/* Up Next */}

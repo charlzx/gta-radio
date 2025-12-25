@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Maximize2, SkipBack, SkipForward } from 'lucide-react';
+import { Maximize2, SkipBack, SkipForward, ListMusic } from 'lucide-react';
 import PlayPauseButton from './PlayPauseButton';
 import VolumeControl from './VolumeControl';
 
@@ -22,6 +22,7 @@ const NowPlayingCard = ({
   onToggleMute,
   isSynced,
   onGoLive,
+  onOpenPlaylist,
 }) => {
   const progressPct = useMemo(() => {
     if (!duration || duration <= 0) return 0;

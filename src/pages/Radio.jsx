@@ -11,6 +11,7 @@ import FocusMode from '../components/FocusMode';
 import SearchFilter from '../components/SearchFilter';
 import RecentlyPlayedCard from '../components/RecentlyPlayedCard';
 import MiniPlayer from '../components/MiniPlayer';
+import PlaylistView from '../components/PlaylistView';
 import { useRadioPlayer } from '../hooks/useRadioPlayer';
 import { useIsMobile } from '../hooks/useIsMobile';
 
@@ -25,6 +26,7 @@ export default function Radio() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isSynced, setIsSynced] = useState(true);
+  const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
 
   // Mobile-specific states
   const isMobile = useIsMobile();
@@ -153,6 +155,14 @@ export default function Radio() {
     if (currentStation && audioRef.current) {
       setIsSynced(true);
       playAtEpoch(currentStation.duration);
+    }
+  };
+  
+  const handleTrackClick = (startTime) => {
+    if (audioRef.current && Number.isFinite(startTime)) {
+      setIsSynced(false); // Disable sync when manually jumping to track
+      audioRef.current.currentTime = startTime;
+      setIsPlaylistOpen(false); // Close playlist after selection
     }
   };
 
@@ -477,6 +487,7 @@ export default function Radio() {
               onToggleMute={handleToggleMute}
               isSynced={isSynced}
               onGoLive={goLive}
+              onOpenPlaylist={() => setIsPlaylistOpen(true)}
             />
             
             {/* Recently Played Card */}
@@ -770,6 +781,7 @@ export default function Radio() {
           onSeek={(t) => { if (audioRef.current && Number.isFinite(t)) { audioRef.current.currentTime = Math.max(0, Math.min(duration || 0, t)); } }}
           isSynced={isSynced}
           onGoLive={goLive}
+          onOpenPlaylist={() => setIsPlaylistOpen(true)}
         />
       )}
 
@@ -819,6 +831,8 @@ export default function Radio() {
             onToggleMute={handleToggleMute}
             isSynced={isSynced}
             onGoLive={goLive}
+            onOpenPlaylist={() => setIsPlaylistOpen(true)}
+            onTrackClick={handleTrackClick}
           />
         </div>
       )}
@@ -888,6 +902,17 @@ export default function Radio() {
           }
         }
       `}</style>
+
+      {/* Playlist View Modal */}
+      <PlaylistView
+        isOpen={isPlaylistOpen}
+        onClose={() => setIsPlaylistOpen(false)}
+        tracklist={currentStation?.tracklist || []}
+        currentTime={currentTime}
+        formatTime={formatTime}
+        onTrackClick={handleTrackClick}
+        isMobile={isMobile}
+      />
     </>
   );
 }

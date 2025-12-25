@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { SkipBack, SkipForward, Power, Volume2, Radio } from 'lucide-react';
+import { SkipBack, SkipForward, Power, Volume2, Radio, ListMusic } from 'lucide-react';
 import PlayPauseButton from './PlayPauseButton';
 import VolumeControl from './VolumeControl';
 
@@ -23,6 +23,7 @@ const FocusMode = ({
   onSeek,
   isSynced,
   onGoLive,
+  onOpenPlaylist,
 }) => {
   const progressPct = useMemo(() => {
     if (!duration || duration <= 0) return 0;
@@ -68,20 +69,22 @@ const FocusMode = ({
       {/* Glassy radio frame */}
       <div className="relative w-full max-w-3xl mx-auto aspect-[16/7] rounded-3xl bg-gradient-to-br from-zinc-900 to-black border border-white/10 shadow-2xl flex flex-col items-center justify-center p-0 md:p-6">
         {/* Power/exit button */}
-        <button
-          onClick={onCloseFocusMode}
-          className="absolute top-4 right-4 z-40 p-3 rounded-full bg-white/10 hover:bg-red-600/80 border border-white/10 text-white shadow-lg transition-colors"
-          aria-label="Exit focus mode"
-        >
-          <Power size={20} />
-        </button>
+        <div className="absolute top-4 right-4 z-40">
+          <button
+            onClick={onCloseFocusMode}
+            className="p-3 rounded-full bg-white/10 hover:bg-red-600/80 border border-white/10 text-white shadow-lg transition-colors"
+            aria-label="Exit focus mode"
+          >
+            <Power size={20} />
+          </button>
+        </div>
 
         {/* Main display */}
         <div className="flex-1 w-full flex flex-col items-center justify-center px-4 md:px-8">
-          {/* Station info row */}
-          <div className="flex items-center gap-3 mb-2">
-            <Radio size={20} className={isSynced ? "text-pink-400 animate-pulse" : "text-gray-400"} />
-            <span className={`text-xs md:text-sm font-bold uppercase tracking-widest ${
+          {/* Sync status row */}
+          <div className="flex items-center gap-2 mb-3">
+            <Radio size={18} className={isSynced ? "text-pink-400 animate-pulse" : "text-gray-400"} />
+            <span className={`text-xs font-bold uppercase tracking-widest ${
               isSynced ? 'text-pink-400' : 'text-gray-400'
             }`}>{isSynced ? 'LIVE' : 'OUT OF SYNC'}</span>
             {!isSynced && (
@@ -92,7 +95,10 @@ const FocusMode = ({
                 Go Live
               </button>
             )}
-            <span className="opacity-40">/</span>
+          </div>
+          
+          {/* Station info row */}
+          <div className="flex items-center gap-2 mb-2">
             <span className="text-white/70 text-xs md:text-sm">{currentGame.name}</span>
             <span className="opacity-40">/</span>
             <span className="text-white font-semibold text-xs md:text-sm">{currentStation.name}</span>
@@ -184,14 +190,23 @@ const FocusMode = ({
                 <SkipForward size={40} strokeWidth={2} fill="white" />
               </button>
             </div>
-            {/* Volume */}
-            <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3" style={{ minWidth: '240px' }}>
-              <VolumeControl
-                volume={volume ?? 0}
-                isMuted={!!isMuted}
-                onVolumeChange={onVolumeChange}
-                onToggleMute={onToggleMute}
-              />
+            {/* Volume and Playlist */}
+            <div className="flex items-center gap-2">
+              <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3" style={{ minWidth: '240px' }}>
+                <VolumeControl
+                  volume={volume ?? 0}
+                  isMuted={!!isMuted}
+                  onVolumeChange={onVolumeChange}
+                  onToggleMute={onToggleMute}
+                />
+              </div>
+              <button
+                onClick={onOpenPlaylist}
+                className="p-3 rounded-full bg-white/10 hover:bg-pink-600/80 border border-white/10 text-white transition-colors"
+                aria-label="View Playlist"
+              >
+                <ListMusic size={20} />
+              </button>
             </div>
           </div>
 
