@@ -19,6 +19,8 @@ const MobileNowPlayingCard = ({
   isMuted,
   onVolumeChange,
   onToggleMute,
+  isSynced,
+  onGoLive,
 }) => {
   const progressPct = useMemo(() => {
     if (!duration || duration <= 0) return 0;
@@ -62,11 +64,11 @@ const MobileNowPlayingCard = ({
   return (
     <div className="bg-black/95 backdrop-blur-xl border-t border-white/20 p-4 h-full overflow-y-auto scrollbar-hide">
       {/* Header with collapse button (high-contrast, larger hit area) */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-center mb-4 relative">
         <div className="text-lg font-bold text-white">Now Playing</div>
         <button
           onClick={onCollapse}
-          className="p-3 rounded-full bg-white/0 hover:bg-white/30 text-white shadow-md transition-colors"
+          className="absolute right-0 p-3 rounded-full bg-white/0 hover:bg-white/30 text-white shadow-md transition-colors"
           aria-label="Collapse player"
         >
           <ChevronDown size={24} />
@@ -82,9 +84,19 @@ const MobileNowPlayingCard = ({
           draggable="false"
         />
         <div className="flex items-center gap-2">
-          <span className="text-xs px-2 py-0.5 rounded-full bg-red-600 text-white font-bold tracking-wide">
-            LIVE
+          <span className={`text-xs px-2 py-0.5 rounded-full font-bold tracking-wide ${
+            isSynced ? 'bg-red-600 text-white' : 'bg-gray-600 text-gray-300'
+          }`}>
+            {isSynced ? 'LIVE' : 'OUT OF SYNC'}
           </span>
+          {!isSynced && (
+            <button
+              onClick={onGoLive}
+              className="text-xs px-3 py-1 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-semibold transition-colors"
+            >
+              Go Live
+            </button>
+          )}
         </div>
         <div className="text-white font-bold text-lg">{currentStation.name}</div>
         <div className="text-xs text-gray-400">{currentGame.name}</div>

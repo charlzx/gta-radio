@@ -21,6 +21,8 @@ const FocusMode = ({
   onVolumeChange,
   onToggleMute,
   onSeek,
+  isSynced,
+  onGoLive,
 }) => {
   const progressPct = useMemo(() => {
     if (!duration || duration <= 0) return 0;
@@ -78,8 +80,19 @@ const FocusMode = ({
         <div className="flex-1 w-full flex flex-col items-center justify-center px-4 md:px-8">
           {/* Station info row */}
           <div className="flex items-center gap-3 mb-2">
-            <Radio size={20} className="text-pink-400 animate-pulse" />
-            <span className="text-xs md:text-sm font-bold text-pink-400 uppercase tracking-widest">LIVE</span>
+            <Radio size={20} className={isSynced ? "text-pink-400 animate-pulse" : "text-gray-400"} />
+            <span className={`text-xs md:text-sm font-bold uppercase tracking-widest ${
+              isSynced ? 'text-pink-400' : 'text-gray-400'
+            }`}>{isSynced ? 'LIVE' : 'OUT OF SYNC'}</span>
+            {!isSynced && (
+              <button
+                onClick={onGoLive}
+                className="text-xs px-3 py-1 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-semibold transition-colors"
+              >
+                Go Live
+              </button>
+            )}
+            <span className="opacity-40">/</span>
             <span className="text-white/70 text-xs md:text-sm">{currentGame.name}</span>
             <span className="opacity-40">/</span>
             <span className="text-white font-semibold text-xs md:text-sm">{currentStation.name}</span>

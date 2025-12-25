@@ -24,6 +24,7 @@ export default function Radio() {
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isSynced, setIsSynced] = useState(true);
 
   // Mobile-specific states
   const isMobile = useIsMobile();
@@ -148,12 +149,20 @@ export default function Radio() {
     window.history.pushState({ view: 'main' }, '', '#');
   };
 
+  const goLive = () => {
+    if (currentStation && audioRef.current) {
+      setIsSynced(true);
+      playAtEpoch(currentStation.duration);
+    }
+  };
+
   const handleStationSelect = (station) => {
     if (station.id === currentStation?.id) {
         togglePlayPause();
         return;
     }
     pause();
+    setIsSynced(true); // Re-enable sync when switching stations
     // If station came from a global result with a game reference, switch context
     if (station.game) {
       setCurrentGame(station.game);
@@ -211,6 +220,7 @@ export default function Radio() {
 
   const goToNextTrack = () => {
     if (!currentStation?.tracklist || !audioRef.current) return;
+    setIsSynced(false); // Disable sync when user manually navigates
     const currentTrack = currentStation.tracklist.find(t => 
       audioRef.current.currentTime >= t.startTime && 
       audioRef.current.currentTime < t.endTime
@@ -226,6 +236,7 @@ export default function Radio() {
 
   const goToPreviousTrack = () => {
     if (!currentStation?.tracklist || !audioRef.current) return;
+    setIsSynced(false); // Disable sync when user manually navigates
     const currentTrack = currentStation.tracklist.find(t => 
       audioRef.current.currentTime >= t.startTime && 
       audioRef.current.currentTime < t.endTime
@@ -464,6 +475,8 @@ export default function Radio() {
               isMuted={isMuted}
               onVolumeChange={handleVolumeChange}
               onToggleMute={handleToggleMute}
+              isSynced={isSynced}
+              onGoLive={goLive}
             />
             
             {/* Recently Played Card */}
@@ -755,6 +768,8 @@ export default function Radio() {
           onVolumeChange={handleVolumeChange}
           onToggleMute={handleToggleMute}
           onSeek={(t) => { if (audioRef.current && Number.isFinite(t)) { audioRef.current.currentTime = Math.max(0, Math.min(duration || 0, t)); } }}
+          isSynced={isSynced}
+          onGoLive={goLive}
         />
       )}
 
@@ -802,6 +817,8 @@ export default function Radio() {
             isMuted={isMuted}
             onVolumeChange={handleVolumeChange}
             onToggleMute={handleToggleMute}
+            isSynced={isSynced}
+            onGoLive={goLive}
           />
         </div>
       )}
