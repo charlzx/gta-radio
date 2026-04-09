@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaChevronUp } from 'react-icons/fa';
+import { ChevronUp } from 'lucide-react';
 import PlayPauseButton from './PlayPauseButton';
 
 const FloatingBottomPlayer = ({ 
@@ -62,7 +62,7 @@ const FloatingBottomPlayer = ({
           className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors flex-shrink-0"
           aria-label="Expand player"
         >
-          <FaChevronUp className="w-4 h-4" />
+          <ChevronUp size={16} />
         </button>
       </div>
     </div>

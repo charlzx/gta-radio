@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { FaStepBackward, FaStepForward, FaChevronDown } from 'react-icons/fa';
+import { SkipBack, SkipForward, ChevronDown, List } from 'lucide-react';
 import PlayPauseButton from './PlayPauseButton';
 import VolumeControl from './VolumeControl';
 
@@ -19,6 +19,9 @@ const MobileNowPlayingCard = ({
   isMuted,
   onVolumeChange,
   onToggleMute,
+  isSynced,
+  onGoLive,
+  onOpenPlaylist,
 }) => {
   const progressPct = useMemo(() => {
     if (!duration || duration <= 0) return 0;
@@ -48,7 +51,7 @@ const MobileNowPlayingCard = ({
             className="p-3 rounded-full bg-white/0 hover:bg-white/30 text-white shadow-md transition-colors"
             aria-label="Collapse player"
           >
-            <FaChevronDown className="w-6 h-6" />
+            <ChevronDown size={24} />
           </button>
         </div>
         <div className="text-center py-8">
@@ -62,14 +65,14 @@ const MobileNowPlayingCard = ({
   return (
     <div className="bg-black/95 backdrop-blur-xl border-t border-white/20 p-4 h-full overflow-y-auto scrollbar-hide">
       {/* Header with collapse button (high-contrast, larger hit area) */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-center mb-4 relative">
         <div className="text-lg font-bold text-white">Now Playing</div>
         <button
           onClick={onCollapse}
-          className="p-3 rounded-full bg-white/0 hover:bg-white/30 text-white shadow-md transition-colors"
+          className="absolute right-0 p-3 rounded-full bg-white/0 hover:bg-white/30 text-white shadow-md transition-colors"
           aria-label="Collapse player"
         >
-          <FaChevronDown className="w-6 h-6" />
+          <ChevronDown size={24} />
         </button>
       </div>
 
@@ -82,9 +85,19 @@ const MobileNowPlayingCard = ({
           draggable="false"
         />
         <div className="flex items-center gap-2">
-          <span className="text-xs px-2 py-0.5 rounded-full bg-red-600 text-white font-bold tracking-wide">
-            LIVE
+          <span className={`text-xs px-2 py-0.5 rounded-full font-bold tracking-wide ${
+            isSynced ? 'bg-red-600 text-white' : 'bg-gray-600 text-gray-300'
+          }`}>
+            {isSynced ? 'LIVE' : 'OUT OF SYNC'}
           </span>
+          {!isSynced && (
+            <button
+              onClick={onGoLive}
+              className="text-xs px-3 py-1 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-semibold transition-colors"
+            >
+              Go Live
+            </button>
+          )}
         </div>
         <div className="text-white font-bold text-lg">{currentStation.name}</div>
         <div className="text-xs text-gray-400">{currentGame.name}</div>
@@ -113,35 +126,46 @@ const MobileNowPlayingCard = ({
       <div className="flex items-center justify-center gap-6 mb-6">
         <button
           onClick={onPreviousTrack}
-          className="p-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 transition-colors"
+          className="rounded-full bg-transparent text-white transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
           aria-label="Previous"
         >
-          <FaStepBackward className="w-5 h-5" />
+          <SkipBack size={40} strokeWidth={2} fill="white" />
         </button>
         <PlayPauseButton isPlaying={isPlaying} onToggle={onTogglePlayPause} size="lg" />
         <button
           onClick={onNextTrack}
-          className="p-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 transition-colors"
+          className="rounded-full bg-transparent text-white transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
           aria-label="Next"
         >
-          <FaStepForward className="w-5 h-5" />
+          <SkipForward size={40} strokeWidth={2} fill="white" />
         </button>
       </div>
 
       {/* Volume Control */}
       <div className="mb-8">
-        <div className="flex items-center mb-3">
-          <div className="text-sm text-gray-300 font-medium mr-2">Volume</div>
-          <div className="text-xs text-gray-400">
-            {isMuted ? 'Muted' : `${Math.round(volume * 100)}%`}
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center">
+            <div className="text-sm text-gray-300 font-medium mr-2">Volume</div>
+            <div className="text-xs text-gray-400">
+              {isMuted ? 'Muted' : `${Math.round(volume * 100)}%`}
+            </div>
           </div>
+          <button
+            onClick={onOpenPlaylist}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            aria-label="View playlist"
+          >
+            <List size={20} />
+          </button>
         </div>
-        <VolumeControl
-          volume={volume}
-          isMuted={isMuted}
-          onVolumeChange={onVolumeChange}
-          onToggleMute={onToggleMute}
-        />
+        <div className="pr-2">
+          <VolumeControl
+            volume={volume}
+            isMuted={isMuted}
+            onVolumeChange={onVolumeChange}
+            onToggleMute={onToggleMute}
+          />
+        </div>
       </div>
 
       {/* Up Next */}

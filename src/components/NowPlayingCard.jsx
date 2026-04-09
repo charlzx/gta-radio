@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { FaExpand, FaStepBackward, FaStepForward } from 'react-icons/fa';
+import { Maximize2, SkipBack, SkipForward, ListMusic } from 'lucide-react';
 import PlayPauseButton from './PlayPauseButton';
 import VolumeControl from './VolumeControl';
 
@@ -20,6 +20,9 @@ const NowPlayingCard = ({
   isMuted,
   onVolumeChange,
   onToggleMute,
+  isSynced,
+  onGoLive,
+  onOpenPlaylist,
 }) => {
   const progressPct = useMemo(() => {
     if (!duration || duration <= 0) return 0;
@@ -63,12 +66,12 @@ const NowPlayingCard = ({
             </button>
           </div>
           <div className="mt-3 flex items-center justify-center gap-3 opacity-50">
-            <button className="p-2 rounded-full bg-white/10" disabled>
-              <FaStepBackward className="w-4 h-4" />
+            <button className="rounded-full bg-transparent text-white" disabled>
+              <SkipBack size={32} strokeWidth={2} fill="white" />
             </button>
             <PlayPauseButton isPlaying={false} onToggle={() => {}} />
-            <button className="p-2 rounded-full bg-white/10" disabled>
-              <FaStepForward className="w-4 h-4" />
+            <button className="rounded-full bg-transparent text-white" disabled>
+              <SkipForward size={32} strokeWidth={2} fill="white" />
             </button>
           </div>
         </div>
@@ -89,16 +92,39 @@ const NowPlayingCard = ({
 
   return (
     <div className="space-y-3">
-      {/* Card 1: Station + Live + Expand */}
+      {/* Card 1: Station Info with Sync Status */}
       <div className="relative bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/10 rounded-lg p-4 overflow-hidden">
-        <button
-          onClick={onOpenFocusMode}
-          className="absolute top-3 right-3 p-2 bg-white/10 hover:bg-white/20 rounded-full border border-white/10 transition-colors"
-          aria-label="Open focus mode"
-        >
-          <FaExpand className="w-4 h-4" />
-        </button>
-        <div className="flex items-center gap-3 pr-12">
+        {/* Sync status bar at top */}
+        <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/10">
+          <div className="flex items-center gap-2">
+            <span className={`text-xs px-2 py-0.5 rounded-full font-bold tracking-wide flex items-center gap-1 whitespace-nowrap ${
+              isSynced ? 'bg-red-600 text-white' : 'bg-gray-600 text-gray-300'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${
+                isSynced ? 'bg-white animate-blink' : 'bg-gray-400'
+              }`}></span>
+              {isSynced ? 'LIVE' : 'OUT OF SYNC'}
+            </span>
+            {!isSynced && (
+              <button
+                onClick={onGoLive}
+                className="text-xs px-3 py-1 rounded-full bg-pink-600 hover:bg-pink-700 text-white font-semibold transition-colors whitespace-nowrap"
+              >
+                Go Live
+              </button>
+            )}
+          </div>
+          <button
+            onClick={onOpenFocusMode}
+            className="p-2 bg-white/10 hover:bg-white/20 rounded-full border border-white/10 transition-colors flex-shrink-0"
+            aria-label="Open focus mode"
+          >
+            <Maximize2 size={16} />
+          </button>
+        </div>
+        
+        {/* Station info below */}
+        <div className="flex items-center gap-3">
           <img
             src={currentStation.logo || currentGame.logo}
             alt={currentStation.name}
@@ -106,12 +132,7 @@ const NowPlayingCard = ({
             draggable="false"
           />
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-xs px-2 py-0.5 rounded-full bg-red-600 text-white font-bold tracking-wide">
-                LIVE
-              </span>
-            </div>
-            <div className="mt-1 text-white font-bold truncate">{currentStation.name}</div>
+            <div className="text-white font-bold truncate">{currentStation.name}</div>
             <div className="text-[11px] text-gray-400">{currentGame.name}</div>
             <div className="text-pink-300 text-sm truncate mt-0.5">
               {nowPlaying?.type === 'Song' && nowPlaying.artist ? `${nowPlaying.artist} — ${nowPlaying.title}` : nowPlaying?.title || 'Tuned' }
@@ -135,18 +156,18 @@ const NowPlayingCard = ({
         <div className="mt-3 flex items-center justify-center gap-3">
           <button
             onClick={onPreviousTrack}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 transition-colors"
+            className="rounded-full bg-transparent text-white transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
             aria-label="Previous"
           >
-            <FaStepBackward className="w-4 h-4" />
+            <SkipBack size={32} strokeWidth={2} fill="white" />
           </button>
           <PlayPauseButton isPlaying={isPlaying} onToggle={onTogglePlayPause} />
           <button
             onClick={onNextTrack}
-            className="p-2 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 transition-colors"
+            className="rounded-full bg-transparent text-white transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
             aria-label="Next"
           >
-            <FaStepForward className="w-4 h-4" />
+            <SkipForward size={32} strokeWidth={2} fill="white" />
           </button>
         </div>
       </div>
@@ -169,7 +190,16 @@ const NowPlayingCard = ({
 
       {/* Card 4: Up Next */}
       <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg p-4">
-        <div className="text-sm font-semibold text-white">Up Next</div>
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-sm font-semibold text-white">Up Next</div>
+          <button
+            onClick={onOpenPlaylist}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            aria-label="View playlist"
+          >
+            <ListMusic size={16} />
+          </button>
+        </div>
         {nextTrack ? (
           <div className="mt-2">
             <div className="text-xs text-gray-400">Next</div>

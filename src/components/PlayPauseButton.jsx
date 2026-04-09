@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaPlay, FaPause, FaStepBackward, FaStepForward } from 'react-icons/fa';
+import { Play, Pause } from 'lucide-react';
 
 const PlayPauseButton = ({ isPlaying, onToggle, size = 'md' }) => {
   const sizes = { 
@@ -8,20 +8,20 @@ const PlayPauseButton = ({ isPlaying, onToggle, size = 'md' }) => {
     lg: 'w-20 h-20' 
   };
   const iconSizes = { 
-    sm: 'text-sm', 
-    md: 'text-3xl', 
-    lg: 'text-4xl' 
+    sm: 16, 
+    md: 32, 
+    lg: 40 
   };
   
   return (
     <button 
       onClick={onToggle} 
-      className={`${sizes[size]} rounded-full bg-transparent text-white flex items-center justify-center transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-white`}
+      className={`${sizes[size]} rounded-full bg-transparent text-white flex items-center justify-center transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none`}
     >
       {isPlaying ? (
-        <FaPause className={iconSizes[size]} />
+        <Pause size={iconSizes[size]} fill="white" />
       ) : (
-        <FaPlay className={`${iconSizes[size]} ml-1`} />
+        <Play size={iconSizes[size]} fill="white" className="ml-0.5" />
       )}
     </button>
   );

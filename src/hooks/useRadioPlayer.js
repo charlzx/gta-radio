@@ -3,8 +3,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 export function useRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = {}) {
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.8);
-  const [isMuted, setIsMuted] = useState(false);
+  
+  // Load volume and mute state from localStorage
+  const [volume, setVolume] = useState(() => {
+    const saved = localStorage.getItem('gta-radio-volume');
+    return saved ? parseFloat(saved) : 1.0;
+  });
+  const [isMuted, setIsMuted] = useState(() => {
+    const saved = localStorage.getItem('gta-radio-muted');
+    return saved === 'true';
+  });
+  
   const epochMsRef = useRef(new Date(radioEpoch).getTime());
   const activeDurationRef = useRef(0);
 
@@ -49,17 +58,18 @@ export function useRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = {}) {
     a.muted = isMuted;
   }, [volume, isMuted]);
 
-  // Periodic drift correction
-  useEffect(() => {
-    if (!isPlaying) return undefined;
-    const id = setInterval(() => {
-      syncToEpoch();
-    }, 30000);
-    return () => clearInterval(id);
-  }, [isPlaying, syncToEpoch]);
-
-  const setVol = useCallback((v) => setVolume(v), []);
-  const toggleMute = useCallback(() => setIsMuted((m) => !m), []);
+  const setVol = useCallback((v) => {
+    setVolume(v);
+    localStorage.setItem('gta-radio-volume', v.toString());
+  }, []);
+  
+  const toggleMute = useCallback(() => {
+    setIsMuted((m) => {
+      const newMuted = !m;
+      localStorage.setItem('gta-radio-muted', newMuted.toString());
+      return newMuted;
+    });
+  }, []);
 
   const attachMediaSession = useCallback(({ currentStation, nowPlaying, currentGame, togglePlayPause, prev, next }) => {
   if ('mediaSession' in navigator) {
