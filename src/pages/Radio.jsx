@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { FaArrowLeft, FaHeart } from 'react-icons/fa';
 import { games } from '../data/games';
 import GameCard from '../components/GameCard';
@@ -45,14 +45,14 @@ export default function Radio() {
   const [showMiniPlayer, setShowMiniPlayer] = useState(false);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
 
-  const { audioRef, isPlaying, volume, isMuted, setVol, toggleMute, playAtEpoch, pause, setActiveDuration, attachMediaSession } = useRadioPlayer();
+  const { audioRef, isPlaying, volume, isMuted, setVol, toggleMute, playAtEpoch, pause, syncToEpoch, setActiveDuration, attachMediaSession } = useRadioPlayer();
   const mainRef = useRef(null);
   // Leave single-game view when searching globally
   useEffect(() => {
     if (searchQuery && selectedGameView) {
       setSelectedGameView(null);
     }
-  }, [searchQuery]);
+  }, [searchQuery, selectedGameView]);
   
   // Handle browser back/forward navigation
   useEffect(() => {
@@ -82,7 +82,7 @@ export default function Radio() {
   // New feature handlers
   const handleVolumeChange = (newVolume) => setVol(newVolume);
 
-  const handleToggleMute = () => toggleMute();
+  const handleToggleMute = useCallback(() => toggleMute(), [toggleMute]);
 
   const handleToggleFavorite = (stationId) => {
     const newFavorites = new Set(favorites);
@@ -167,6 +167,10 @@ export default function Radio() {
   };
 
   const handleStationSelect = (station) => {
+    if (!station?.audioUrl) {
+      return;
+    }
+
     if (station.id === currentStation?.id) {
         togglePlayPause();
         return;
@@ -186,15 +190,10 @@ export default function Radio() {
       if (audioRef.current) {
         playAtEpoch(station.duration);
       }
-      audioRef.current?.removeEventListener('canplay', handleCanPlay);
     };
     
     if (audioRef.current) {
-      audioRef.current.addEventListener('canplay', handleCanPlay);
-      // Fallback timeout in case canplay doesn't fire
-      setTimeout(() => {
-        audioRef.current?.removeEventListener('canplay', handleCanPlay);
-      }, 5000);
+      audioRef.current.addEventListener('canplay', handleCanPlay, { once: true });
     }
   };
 
@@ -222,13 +221,13 @@ export default function Radio() {
     return () => clearTimeout(t);
   }, []);
 
-  const togglePlayPause = () => {
+  const togglePlayPause = useCallback(() => {
     if (!currentStation || !audioRef.current) return;
     if (isPlaying) return pause();
     playAtEpoch(currentStation.duration);
-  };
+  }, [currentStation, audioRef, isPlaying, pause, playAtEpoch]);
 
-  const goToNextTrack = () => {
+  const goToNextTrack = useCallback(() => {
     if (!currentStation?.tracklist || !audioRef.current) return;
     setIsSynced(false); // Disable sync when user manually navigates
     const currentTrack = currentStation.tracklist.find(t => 
@@ -242,9 +241,9 @@ export default function Radio() {
         audioRef.current.currentTime = nextTrack.startTime;
       }
     }
-  };
+  }, [currentStation, audioRef]);
 
-  const goToPreviousTrack = () => {
+  const goToPreviousTrack = useCallback(() => {
     if (!currentStation?.tracklist || !audioRef.current) return;
     setIsSynced(false); // Disable sync when user manually navigates
     const currentTrack = currentStation.tracklist.find(t => 
@@ -261,7 +260,7 @@ export default function Radio() {
         audioRef.current.currentTime = currentTrack.startTime;
       }
     }
-  };
+  }, [currentStation, audioRef]);
   
   useEffect(() => {
   const audioElement = audioRef.current;
@@ -307,7 +306,16 @@ export default function Radio() {
         audioElement.removeEventListener('ended', handleEnded);
       }
     };
-  }, [currentStation, nowPlaying.title, volume, isMuted, setActiveDuration, isPlaying, playAtEpoch]);
+  }, [currentStation, nowPlaying.title, volume, isMuted, setActiveDuration, isPlaying, playAtEpoch, audioRef]);
+
+  // Periodic drift correction only while in synced mode
+  useEffect(() => {
+    if (!isPlaying || !isSynced || !currentStation?.duration) return undefined;
+    const id = setInterval(() => {
+      syncToEpoch(currentStation.duration);
+    }, 30000);
+    return () => clearInterval(id);
+  }, [isPlaying, isSynced, currentStation, syncToEpoch]);
 
   // Mini player scroll effect
   useEffect(() => {
@@ -331,7 +339,7 @@ export default function Radio() {
       prev: () => goToPreviousTrack(),
       next: () => goToNextTrack(),
     });
-  }, [attachMediaSession, currentStation, nowPlaying, currentGame]);
+  }, [attachMediaSession, currentStation, nowPlaying, currentGame, togglePlayPause, goToPreviousTrack, goToNextTrack]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -346,7 +354,7 @@ export default function Radio() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [togglePlayPause]);
+  }, [togglePlayPause, handleToggleMute, goToPreviousTrack, goToNextTrack]);
 
   // Dynamic title update based on what's playing
   useEffect(() => {
@@ -431,8 +439,9 @@ export default function Radio() {
                           <li key={`${station.game.id}-${station.id}`}>
                             <button
                               type="button"
-                              onClick={() => { handleStationSelect(station); setShowSearchDropdown(false); }}
-                              className="w-full px-2 py-1.5 flex items-center gap-2 hover:bg-gray-800"
+                              onClick={() => { if (!station.audioUrl) return; handleStationSelect(station); setShowSearchDropdown(false); }}
+                              className={`w-full px-2 py-1.5 flex items-center gap-2 ${station.audioUrl ? 'hover:bg-gray-800' : 'opacity-60 cursor-not-allowed'}`}
+                              disabled={!station.audioUrl}
                             >
                               <img src={station.logo} alt={station.name} className="w-8 h-8 rounded object-cover" />
                               <div className="flex-1 min-w-0 text-left">
@@ -792,8 +801,11 @@ export default function Radio() {
           nowPlaying={nowPlaying}
           isPlaying={isPlaying}
           onTogglePlayPause={togglePlayPause}
-          onOpenFocusMode={handleOpenFocusMode}
+          onExpand={handleOpenFocusMode}
           onClose={() => setShowMiniPlayer(false)}
+          isVisible={showMiniPlayer}
+          currentTime={currentTime}
+          duration={duration}
         />
       )}
 

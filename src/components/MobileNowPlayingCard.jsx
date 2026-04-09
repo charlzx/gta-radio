@@ -22,7 +22,6 @@ const MobileNowPlayingCard = ({
   isSynced,
   onGoLive,
   onOpenPlaylist,
-  onTrackClick,
 }) => {
   const progressPct = useMemo(() => {
     if (!duration || duration <= 0) return 0;

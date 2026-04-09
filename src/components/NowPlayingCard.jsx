@@ -190,7 +190,16 @@ const NowPlayingCard = ({
 
       {/* Card 4: Up Next */}
       <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg p-4">
-        <div className="text-sm font-semibold text-white">Up Next</div>
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-sm font-semibold text-white">Up Next</div>
+          <button
+            onClick={onOpenPlaylist}
+            className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            aria-label="View playlist"
+          >
+            <ListMusic size={16} />
+          </button>
+        </div>
         {nextTrack ? (
           <div className="mt-2">
             <div className="text-xs text-gray-400">Next</div>

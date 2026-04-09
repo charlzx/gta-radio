@@ -182,9 +182,6 @@ gta-radio/
 ├── vercel.json                   # Vercel deployment configuration
 └── vite.config.js                # Vite build configuration
 ```
-├── index.html           # HTML template with dynamic title support
-└── vite.config.js       # Vite configuration
-```
 
 ## Adding Radio Stations
 

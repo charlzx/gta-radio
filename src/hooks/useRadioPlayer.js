@@ -58,15 +58,6 @@ export function useRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = {}) {
     a.muted = isMuted;
   }, [volume, isMuted]);
 
-  // Periodic drift correction (only when synced)
-  useEffect(() => {
-    if (!isPlaying) return undefined;
-    const id = setInterval(() => {
-      syncToEpoch();
-    }, 30000);
-    return () => clearInterval(id);
-  }, [isPlaying, syncToEpoch]);
-
   const setVol = useCallback((v) => {
     setVolume(v);
     localStorage.setItem('gta-radio-volume', v.toString());

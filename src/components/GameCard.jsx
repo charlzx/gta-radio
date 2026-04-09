@@ -48,7 +48,7 @@ const GameCard = ({ game, isDisabled, onSelect, isSelected, initialLoading = fal
     minDisplayRef.current = setTimeout(() => setShowSkeleton(false), MIN_MS);
 
     return () => clearTimeout(minDisplayRef.current);
-  }, [bannerLoaded, logoLoaded, game.banner, game.logo, initialLoading]);
+  }, [bannerLoaded, logoLoaded, game.banner, game.logo, initialLoading, isMobile]);
 
   useEffect(() => {
     // Small delay to prevent initial mount animations

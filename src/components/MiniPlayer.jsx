@@ -9,9 +9,13 @@ const MiniPlayer = ({
   onTogglePlayPause, 
   onExpand, 
   onClose,
-  isVisible 
+  isVisible,
+  currentTime,
+  duration,
 }) => {
   if (!isVisible || !currentStation) return null;
+
+  const progressPct = duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
 
   return (
     <div className="fixed bottom-4 right-4 w-80 bg-black/95 backdrop-blur-xl rounded-xl p-4 border border-white/20 z-40 animate-fade-in-up">
@@ -55,7 +59,7 @@ const MiniPlayer = ({
         <div className="w-full bg-white/10 rounded-full h-1">
           <div 
             className="bg-pink-500 h-1 rounded-full transition-all duration-300" 
-            style={{ width: '45%' }} // You can pass actual progress here
+            style={{ width: `${progressPct}%` }}
           />
         </div>
       </div>
