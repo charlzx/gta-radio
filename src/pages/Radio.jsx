@@ -184,18 +184,20 @@ export default function Radio() {
     setCurrentStation(station);
     setNowPlaying({ type: 'Info', artist: station.name, title: 'Loading...' });
     addToRecentlyPlayed(station);
-    
-    // Wait for the audio to be ready before playing
-    const handleCanPlay = () => {
-      if (audioRef.current) {
-        playAtEpoch(station.duration);
-      }
-    };
-    
-    if (audioRef.current) {
-      audioRef.current.addEventListener('canplay', handleCanPlay, { once: true });
-    }
   };
+
+  // Start playback once the current station audio is ready, and always clean up previous listeners.
+  useEffect(() => {
+    const audioElement = audioRef.current;
+    if (!audioElement || !currentStation?.audioUrl || !currentStation?.duration) return undefined;
+
+    const handleCanPlay = () => {
+      playAtEpoch(currentStation.duration);
+    };
+
+    audioElement.addEventListener('canplay', handleCanPlay);
+    return () => audioElement.removeEventListener('canplay', handleCanPlay);
+  }, [audioRef, currentStation, playAtEpoch]);
 
   // Mobile-specific handlers
   const handleMobilePlayerExpand = () => {
@@ -787,7 +789,12 @@ export default function Radio() {
           isMuted={isMuted}
           onVolumeChange={handleVolumeChange}
           onToggleMute={handleToggleMute}
-          onSeek={(t) => { if (audioRef.current && Number.isFinite(t)) { audioRef.current.currentTime = Math.max(0, Math.min(duration || 0, t)); } }}
+          onSeek={(t) => {
+            if (audioRef.current && Number.isFinite(t)) {
+              setIsSynced(false);
+              audioRef.current.currentTime = Math.max(0, Math.min(duration || 0, t));
+            }
+          }}
           isSynced={isSynced}
           onGoLive={goLive}
           onOpenPlaylist={() => setIsPlaylistOpen(true)}
