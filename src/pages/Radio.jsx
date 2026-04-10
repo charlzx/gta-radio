@@ -877,7 +877,7 @@ export default function Radio() {
         </div>
       )}
       
-      <div ref={playerMountRef} className="fixed w-0 h-0 overflow-hidden opacity-0 pointer-events-none" aria-hidden="true" />
+      <div ref={playerMountRef} className="fixed -left-[9999px] top-0 w-px h-px overflow-hidden pointer-events-none" aria-hidden="true" />
       <audio ref={audioRef} className="hidden" preload="auto" crossOrigin="anonymous" />
 
       <style>{`

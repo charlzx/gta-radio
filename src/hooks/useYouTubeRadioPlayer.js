@@ -318,8 +318,8 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
 
       playerRef.current = new window.YT.Player(ytHost, {
         videoId,
-        height: '0',
-        width: '0',
+        height: '1',
+        width: '1',
         playerVars: {
           autoplay: 0,
           controls: 0,
