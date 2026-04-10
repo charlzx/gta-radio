@@ -131,7 +131,7 @@ export default function Radio() {
   // };
 
   // Get active stations (those with audio available)
-  const getStationSourceUrl = useCallback((station) => station?.youtubeUrl || station?.audioUrl || null, []);
+  const getStationSourceUrl = useCallback((station) => station?.audioUrl || station?.youtubeUrl || null, []);
 
   // Get active stations (those with a playable source URL)
   const getActiveStations = (stations) => {
