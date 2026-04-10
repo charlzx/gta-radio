@@ -94,6 +94,7 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
   const modeRef = useRef('none');
   const loadRequestIdRef = useRef(0);
   const playRequestIdRef = useRef(0);
+  const currentSourceUrlRef = useRef('');
 
   const setActiveDuration = useCallback((d) => {
     activeDurationRef.current = Number(d) || 0;
@@ -265,7 +266,20 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
   const loadFromUrl = useCallback(async (url, options = {}) => {
     const requestId = ++loadRequestIdRef.current;
     const autoPlayDuration = Number(options?.autoPlayDuration) || 0;
-    const videoId = extractYouTubeVideoId(url);
+    const sourceUrl = typeof url === 'string' ? url.trim() : '';
+    if (!sourceUrl) return false;
+
+    // Avoid reloading the same source on re-renders/effect retries.
+    if (currentSourceUrlRef.current === sourceUrl) {
+      if (autoPlayDuration && isPlayerReady) {
+        await playAtEpoch(autoPlayDuration);
+      }
+      return true;
+    }
+
+    currentSourceUrlRef.current = sourceUrl;
+
+    const videoId = extractYouTubeVideoId(sourceUrl);
     const audioElement = audioRef.current;
 
     setIsPlaying(false);
@@ -344,16 +358,23 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
       return true;
     }
 
-    if (!audioElement || !url) {
+    if (!audioElement) {
       return false;
     }
 
     modeRef.current = 'audio';
+    currentVideoIdRef.current = null;
+
+    let initialized = false;
 
     const onReady = async () => {
+      if (initialized) return;
+      initialized = true;
       if (requestId !== loadRequestIdRef.current) return;
       setIsPlayerReady(true);
       durationRef.current = Number(audioElement.duration) || 0;
+      audioElement.onloadedmetadata = null;
+      audioElement.oncanplay = null;
       if (autoPlayDuration) {
         await playAtEpoch(autoPlayDuration);
       }
@@ -377,12 +398,13 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
       }
     }
 
-    audioElement.src = url;
+    audioElement.pause();
+    audioElement.src = sourceUrl;
     audioElement.load();
     applyPlayerAudioSettings();
 
     return true;
-  }, [applyPlayerAudioSettings, ensureYouTubeHost, getDuration, playAtEpoch]);
+  }, [applyPlayerAudioSettings, ensureYouTubeHost, getDuration, isPlayerReady, playAtEpoch]);
 
   useEffect(() => {
     applyPlayerAudioSettings();
