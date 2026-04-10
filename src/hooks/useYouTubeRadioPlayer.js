@@ -77,6 +77,7 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
   const audioRef = useRef(null);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [lastEndedAt, setLastEndedAt] = useState(0);
 
   const [volume, setVolume] = useState(() => {
     const saved = localStorage.getItem('gta-radio-volume');
@@ -187,6 +188,36 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
       setIsPlaying(true);
     }
   }, [isPlayerReady, syncToEpoch]);
+
+  const playFrom = useCallback(async (seconds = 0) => {
+    if (!isPlayerReady) return;
+
+    playRequestIdRef.current += 1;
+    const requestId = playRequestIdRef.current;
+    seekTo(seconds);
+
+    if (modeRef.current === 'audio') {
+      const a = audioRef.current;
+      if (!a) return;
+      try {
+        await a.play();
+        if (requestId !== playRequestIdRef.current) return;
+        setIsPlaying(true);
+      } catch (e) {
+        if (e?.name !== 'AbortError') {
+          console.error('Playback failed:', e);
+        }
+        setIsPlaying(false);
+      }
+      return;
+    }
+
+    const p = playerRef.current;
+    if (p && typeof p.playVideo === 'function') {
+      p.playVideo();
+      setIsPlaying(true);
+    }
+  }, [isPlayerReady, seekTo]);
 
   const pause = useCallback(() => {
     playRequestIdRef.current += 1;
@@ -350,6 +381,9 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
               setIsPlaying(true);
             } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
               setIsPlaying(false);
+              if (event.data === YT.PlayerState.ENDED) {
+                setLastEndedAt(Date.now());
+              }
             }
           },
         },
@@ -382,7 +416,10 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
 
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
-    const onEnded = () => setIsPlaying(false);
+    const onEnded = () => {
+      setIsPlaying(false);
+      setLastEndedAt(Date.now());
+    };
 
     audioElement.onloadedmetadata = onReady;
     audioElement.oncanplay = onReady;
@@ -463,6 +500,7 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
     setVol,
     toggleMute,
     playAtEpoch,
+    playFrom,
     pause,
     syncToEpoch,
     setActiveDuration,
@@ -471,5 +509,6 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
     seekTo,
     getCurrentTime,
     getDuration,
+    lastEndedAt,
   };
 }

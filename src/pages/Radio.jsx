@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { FaArrowLeft, FaHeart } from 'react-icons/fa';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { games } from '../data/games';
 import GameCard from '../components/GameCard';
 import StationCard from '../components/StationCard';
@@ -10,12 +11,15 @@ import FloatingBottomPlayer from '../components/FloatingBottomPlayer';
 import FocusMode from '../components/FocusMode';
 import SearchFilter from '../components/SearchFilter';
 import RecentlyPlayedCard from '../components/RecentlyPlayedCard';
-import MiniPlayer from '../components/MiniPlayer';
 import PlaylistView from '../components/PlaylistView';
+import StationDetails from './StationDetails';
 import { useYouTubeRadioPlayer } from '../hooks/useYouTubeRadioPlayer';
 import { useIsMobile } from '../hooks/useIsMobile';
 
 export default function Radio() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [gameData] = useState(games);
   const [currentGame, setCurrentGame] = useState(gameData.vcs);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -27,6 +31,8 @@ export default function Radio() {
   const [duration, setDuration] = useState(0);
   const [isSynced, setIsSynced] = useState(true);
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
+  const [loopOnEnd, setLoopOnEnd] = useState(() => localStorage.getItem('gta-radio-loop-on-end') === 'true');
+  const [shuffleOnEnd, setShuffleOnEnd] = useState(() => localStorage.getItem('gta-radio-shuffle-on-end') === 'true');
 
   // Mobile-specific states
   const isMobile = useIsMobile();
@@ -42,8 +48,8 @@ export default function Radio() {
     return saved ? new Set(JSON.parse(saved)) : new Set();
   });
   const [recentlyPlayed, setRecentlyPlayed] = useState([]);
-  const [showMiniPlayer, setShowMiniPlayer] = useState(false);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const [pendingTrackStart, setPendingTrackStart] = useState(null);
 
   const {
     playerMountRef,
@@ -55,6 +61,7 @@ export default function Radio() {
     setVol,
     toggleMute,
     playAtEpoch,
+    playFrom,
     pause,
     syncToEpoch,
     setActiveDuration,
@@ -63,9 +70,16 @@ export default function Radio() {
     seekTo,
     getCurrentTime,
     getDuration,
+    lastEndedAt,
   } = useYouTubeRadioPlayer();
   const mainRef = useRef(null);
   const wasPlayingBeforeHideRef = useRef(false);
+  const lastAppliedQueryRef = useRef('');
+
+  const detailsMatch = location.pathname.match(/^\/radio\/([^/]+)\/([^/]+)$/);
+  const detailsGameId = detailsMatch?.[1] || null;
+  const detailsStationId = detailsMatch?.[2] || null;
+  const isDetailsRoute = Boolean(detailsMatch);
   // Leave single-game view when searching globally
   useEffect(() => {
     if (searchQuery && selectedGameView) {
@@ -103,6 +117,30 @@ export default function Radio() {
 
   const handleToggleMute = useCallback(() => toggleMute(), [toggleMute]);
 
+  const handleToggleLoopOnEnd = useCallback(() => {
+    setLoopOnEnd((prev) => {
+      const next = !prev;
+      localStorage.setItem('gta-radio-loop-on-end', next.toString());
+      if (next) {
+        setShuffleOnEnd(false);
+        localStorage.setItem('gta-radio-shuffle-on-end', 'false');
+      }
+      return next;
+    });
+  }, []);
+
+  const handleToggleShuffleOnEnd = useCallback(() => {
+    setShuffleOnEnd((prev) => {
+      const next = !prev;
+      localStorage.setItem('gta-radio-shuffle-on-end', next.toString());
+      if (next) {
+        setLoopOnEnd(false);
+        localStorage.setItem('gta-radio-loop-on-end', 'false');
+      }
+      return next;
+    });
+  }, []);
+
   const handleToggleFavorite = (stationId) => {
     const newFavorites = new Set(favorites);
     if (newFavorites.has(stationId)) {
@@ -114,12 +152,12 @@ export default function Radio() {
     localStorage.setItem('gta-radio-favorites', JSON.stringify([...newFavorites]));
   };
 
-  const addToRecentlyPlayed = (station) => {
+  const addToRecentlyPlayed = useCallback((station) => {
     setRecentlyPlayed(prev => {
       const filtered = prev.filter(s => s.id !== station.id);
       return [station, ...filtered].slice(0, 5); // Keep only 5 recent stations
     });
-  };
+  }, []);
 
   // Filter stations based on search and genre (currently unused; will be re-enabled with full search UI)
   // const getFilteredStations = (stations) => {
@@ -209,6 +247,55 @@ export default function Radio() {
     addToRecentlyPlayed(station);
   };
 
+  useEffect(() => {
+    const queryGameId = searchParams.get('game');
+    const queryStationId = searchParams.get('station');
+    const queryStart = searchParams.get('start');
+    if (!queryGameId || !queryStationId) return;
+
+    const queryKey = `${queryGameId}|${queryStationId}|${queryStart ?? ''}`;
+    if (lastAppliedQueryRef.current === queryKey) return;
+
+    const game = gameData[queryGameId];
+    if (!game) return;
+
+    const station = (game.stations || []).find((s) => s.id === queryStationId);
+    if (!station || !getStationSourceUrl(station)) return;
+
+    lastAppliedQueryRef.current = queryKey;
+    setCurrentGame(game);
+    setSelectedGameView(game);
+    pause();
+    setIsSynced(true);
+    setCurrentStation(station);
+    setNowPlaying({ type: 'Info', artist: station.name, title: 'Loading...' });
+    addToRecentlyPlayed(station);
+    if (queryStart !== null && Number.isFinite(Number(queryStart))) {
+      setPendingTrackStart({ stationId: station.id, startTime: Math.max(0, Number(queryStart)) });
+    }
+    if (!isDetailsRoute) {
+      window.history.replaceState({ view: 'game', gameId: game.id }, '', `#${game.id}`);
+    }
+  }, [searchParams, gameData, getStationSourceUrl, pause, addToRecentlyPlayed, isDetailsRoute]);
+
+  const handleSearchStationSelect = (station) => {
+    const gameForRoute = station.game || Object.values(gameData).find((g) => g.stations.some((s) => s.id === station.id));
+    if (!gameForRoute) return;
+
+    setShowSearchDropdown(false);
+    setSearchQuery('');
+    navigate(`/radio/${gameForRoute.id}/${station.id}`);
+  };
+
+  useEffect(() => {
+    if (!pendingTrackStart || !currentStation || !isPlayerReady) return;
+    if (currentStation.id !== pendingTrackStart.stationId) return;
+
+    setIsSynced(false);
+    playFrom(pendingTrackStart.startTime);
+    setPendingTrackStart(null);
+  }, [pendingTrackStart, currentStation, isPlayerReady, playFrom]);
+
   // Load YouTube video when station changes.
   useEffect(() => {
     const stationSourceUrl = getStationSourceUrl(currentStation);
@@ -282,6 +369,40 @@ export default function Radio() {
       }
     }
   }, [currentStation, getCurrentTime, seekTo]);
+
+  useEffect(() => {
+    if (!lastEndedAt || !currentStation) return;
+
+    if (loopOnEnd) {
+      setIsSynced(false);
+      playFrom(0);
+      return;
+    }
+
+    if (!shuffleOnEnd) return;
+
+    const activeStations = (currentGame?.stations || []).filter(
+      (s) => !!getStationSourceUrl(s) && s.id !== currentStation.id
+    );
+    if (!activeStations.length) return;
+
+    const randomStation = activeStations[Math.floor(Math.random() * activeStations.length)];
+    pause();
+    setIsSynced(true);
+    setCurrentStation(randomStation);
+    setNowPlaying({ type: 'Info', artist: randomStation.name, title: 'Loading...' });
+    addToRecentlyPlayed(randomStation);
+  }, [
+    lastEndedAt,
+    currentStation,
+    loopOnEnd,
+    shuffleOnEnd,
+    playFrom,
+    currentGame,
+    getStationSourceUrl,
+    pause,
+    addToRecentlyPlayed,
+  ]);
   
   useEffect(() => {
     if (!currentStation) {
@@ -321,18 +442,6 @@ export default function Radio() {
     return () => clearInterval(id);
   }, [isPlaying, isSynced, currentStation, syncToEpoch]);
 
-  // Mini player scroll effect
-  useEffect(() => {
-    const el = mainRef.current;
-    if (!el) return undefined;
-    const onScroll = () => {
-      const scrollTop = el.scrollTop;
-      setShowMiniPlayer(!!(currentStation && !isFocusMode && scrollTop > 100));
-    };
-    el.addEventListener('scroll', onScroll);
-    return () => el.removeEventListener('scroll', onScroll);
-  }, [currentStation, isFocusMode]);
-
   // Media Session
   useEffect(() => {
     attachMediaSession({
@@ -371,13 +480,17 @@ export default function Radio() {
       if (!wasPlayingBeforeHideRef.current) return;
       if (!currentStation || !isPlayerReady) return;
 
-      playAtEpoch(currentStation.duration);
+      if (isSynced) {
+        playAtEpoch(currentStation.duration);
+      } else {
+        playFrom(getCurrentTime());
+      }
       wasPlayingBeforeHideRef.current = false;
     };
 
     document.addEventListener('visibilitychange', onVisibilityChange);
     return () => document.removeEventListener('visibilitychange', onVisibilityChange);
-  }, [isPlaying, currentStation, isPlayerReady, playAtEpoch]);
+  }, [isPlaying, currentStation, isPlayerReady, isSynced, playAtEpoch, playFrom, getCurrentTime]);
 
   // Dynamic title update based on what's playing
   useEffect(() => {
@@ -462,9 +575,11 @@ export default function Radio() {
                           <li key={`${station.game.id}-${station.id}`}>
                             <button
                               type="button"
-                                onClick={() => { if (!getStationSourceUrl(station)) return; handleStationSelect(station); setShowSearchDropdown(false); }}
-                                className={`w-full px-2 py-1.5 flex items-center gap-2 ${getStationSourceUrl(station) ? 'hover:bg-gray-800' : 'opacity-60 cursor-not-allowed'}`}
-                                disabled={!getStationSourceUrl(station)}
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  handleSearchStationSelect(station);
+                                }}
+                                className="w-full px-2 py-1.5 flex items-center gap-2 hover:bg-gray-800"
                             >
                               <img src={station.logo} alt={station.name} className="w-8 h-8 rounded object-cover" />
                               <div className="flex-1 min-w-0 text-left">
@@ -520,6 +635,10 @@ export default function Radio() {
               isSynced={isSynced}
               onGoLive={goLive}
               onOpenPlaylist={() => setIsPlaylistOpen(true)}
+              loopOnEnd={loopOnEnd}
+              shuffleOnEnd={shuffleOnEnd}
+              onToggleLoopOnEnd={handleToggleLoopOnEnd}
+              onToggleShuffleOnEnd={handleToggleShuffleOnEnd}
             />
             
             {/* Recently Played Card */}
@@ -538,7 +657,9 @@ export default function Radio() {
         {/* Right Panel: Main Content */}
   <main ref={mainRef} className={`${isMobile ? 'w-full pb-safe overflow-x-hidden' : 'md:col-span-2 lg:col-span-3'} bg-black/30 backdrop-blur-lg rounded-lg overflow-y-auto ${isMobile ? 'scrollbar-hide' : 'custom-scrollbar'} min-h-0 shadow-inner shadow-white/5`}>
           <div className="p-0 sm:p-4">
-          {selectedGameView ? (
+          {isDetailsRoute ? (
+            <StationDetails gameIdParam={detailsGameId} stationIdParam={detailsStationId} embedded />
+          ) : selectedGameView ? (
             // Single Game View - Mobile-optimized List
             <>
               <header className={`flex items-center gap-3 mb-4 ${isMobile ? 'px-0' : ''}`}>
@@ -819,21 +940,10 @@ export default function Radio() {
           isSynced={isSynced}
           onGoLive={goLive}
           onOpenPlaylist={() => setIsPlaylistOpen(true)}
-        />
-      )}
-
-      {/* Mini Player - Desktop only when scrolled */}
-      {!isMobile && showMiniPlayer && currentStation && (
-        <MiniPlayer
-          currentStation={currentStation}
-          nowPlaying={nowPlaying}
-          isPlaying={isPlaying}
-          onTogglePlayPause={togglePlayPause}
-          onExpand={handleOpenFocusMode}
-          onClose={() => setShowMiniPlayer(false)}
-          isVisible={showMiniPlayer}
-          currentTime={currentTime}
-          duration={duration}
+          loopOnEnd={loopOnEnd}
+          shuffleOnEnd={shuffleOnEnd}
+          onToggleLoopOnEnd={handleToggleLoopOnEnd}
+          onToggleShuffleOnEnd={handleToggleShuffleOnEnd}
         />
       )}
 
