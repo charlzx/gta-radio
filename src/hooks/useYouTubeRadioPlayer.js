@@ -72,6 +72,7 @@ function extractYouTubeVideoId(url) {
 
 export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = {}) {
   const playerMountRef = useRef(null);
+  const ytHostRef = useRef(null);
   const playerRef = useRef(null);
   const audioRef = useRef(null);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
@@ -96,6 +97,21 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
 
   const setActiveDuration = useCallback((d) => {
     activeDurationRef.current = Number(d) || 0;
+  }, []);
+
+  const ensureYouTubeHost = useCallback(() => {
+    const mount = playerMountRef.current;
+    if (!mount) return null;
+
+    if (!ytHostRef.current || !mount.contains(ytHostRef.current)) {
+      mount.textContent = '';
+      const host = document.createElement('div');
+      host.className = 'yt-player-host';
+      mount.appendChild(host);
+      ytHostRef.current = host;
+    }
+
+    return ytHostRef.current;
   }, []);
 
   const getCurrentTime = useCallback(() => {
@@ -255,7 +271,9 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
     setIsPlaying(false);
     setIsPlayerReady(false);
 
-    if (videoId && playerMountRef.current) {
+    const ytHost = videoId ? ensureYouTubeHost() : null;
+
+    if (videoId && ytHost) {
       modeRef.current = 'youtube';
 
       if (audioElement) {
@@ -277,10 +295,14 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
       }
 
       if (playerRef.current && typeof playerRef.current.destroy === 'function') {
-        playerRef.current.destroy();
+        try {
+          playerRef.current.destroy();
+        } catch {
+          // Ignore teardown errors from detached iframe nodes.
+        }
       }
 
-      playerRef.current = new window.YT.Player(playerMountRef.current, {
+      playerRef.current = new window.YT.Player(ytHost, {
         videoId,
         height: '0',
         width: '0',
@@ -348,7 +370,11 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
     audioElement.onended = onEnded;
 
     if (playerRef.current && typeof playerRef.current.pauseVideo === 'function') {
-      playerRef.current.pauseVideo();
+      try {
+        playerRef.current.pauseVideo();
+      } catch {
+        // Ignore pause errors from tearing-down players.
+      }
     }
 
     audioElement.src = url;
@@ -356,21 +382,32 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
     applyPlayerAudioSettings();
 
     return true;
-  }, [applyPlayerAudioSettings, getDuration, playAtEpoch]);
+  }, [applyPlayerAudioSettings, ensureYouTubeHost, getDuration, playAtEpoch]);
 
   useEffect(() => {
     applyPlayerAudioSettings();
   }, [applyPlayerAudioSettings]);
 
   useEffect(() => {
+    const audioElement = audioRef.current;
+    const mountElement = playerMountRef.current;
+
     return () => {
       if (playerRef.current && typeof playerRef.current.destroy === 'function') {
-        playerRef.current.destroy();
+        try {
+          playerRef.current.destroy();
+        } catch {
+          // Ignore teardown errors from detached iframe nodes.
+        }
       }
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
+      if (audioElement) {
+        audioElement.pause();
+        audioElement.src = '';
       }
+      if (mountElement) {
+        mountElement.textContent = '';
+      }
+      ytHostRef.current = null;
       playerRef.current = null;
     };
   }, []);
