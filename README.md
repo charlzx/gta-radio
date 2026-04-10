@@ -120,67 +120,9 @@ src/assets/games/
 ├── gtaiv/   # GTA IV - ready for future assets
 └── gtav/    # GTA V - ready for future assets
 
-// Import example in games.js
+// Import example in src/data/games/vcs.js
 import vcsLogo from '../assets/games/vcs/vcs-logo.png';
 import vcsBanner from '../assets/games/vcs/vcs-banner.png';
-```
-
-## Project Structure
-
-```
-gta-radio/
-├── public/                         # Static assets and PWA files
-│   ├── favicon.ico                 # Site favicon
-│   ├── apple-touch-icon.png        # iOS home screen icon
-│   ├── favicon-16x16.png          # Small favicon variant
-│   ├── favicon-32x32.png          # Standard favicon variant
-│   └── site.webmanifest           # PWA manifest file
-├── src/
-│   ├── assets/                     # Local static assets organized by game
-│   │   ├── react.svg              # React logo
-│   │   └── games/                 # Game-specific visual assets
-│   │       ├── vcs/               # Vice City Stories assets
-│   │       │   ├── vcs-logo.png   # Game logo
-│   │       │   ├── vcs-banner.png # Card banner background
-│   │       │   └── vcs-bg.png     # Page background image
-│   │       ├── vc/                # Vice City assets
-│   │       ├── sa/                # San Andreas assets  
-│   │       ├── gta3/              # GTA III assets
-│   │       ├── gtaiv/             # GTA IV assets
-│   │       └── gtav/              # GTA V assets
-│   ├── components/                # Modular React components
-│   │   ├── FloatingBottomPlayer.jsx  # Mobile bottom player
-│   │   ├── FocusMode.jsx             # Fullscreen immersive player
-│   │   ├── GameCard.jsx              # Game selection cards
-│   │   ├── MiniPlayer.jsx            # Scroll-triggered mini player
-│   │   ├── MobileNowPlayingCard.jsx  # Mobile-optimized now playing
-│   │   ├── NowPlayingCard.jsx        # Desktop sidebar player
-│   │   ├── PlayPauseButton.jsx       # Reusable play/pause control
-│   │   ├── RecentlyPlayedCard.jsx    # Recently played stations
-│   │   ├── SearchFilter.jsx          # Real-time search interface
-│   │   ├── StationCard.jsx           # Grid view station cards
-│   │   ├── StationListItem.jsx       # List view station rows
-│   │   └── VolumeControl.jsx         # Volume slider and mute
-│   ├── data/
-│   │   └── games.js               # Game and station data configuration
-│   ├── hooks/                     # Custom React hooks
-│   │   ├── useIsMobile.js         # Mobile device detection
-│   │   └── useRadioPlayer.js      # Radio player state management
-│   ├── pages/                     # Main application pages
-│   │   ├── Home.jsx               # Landing page with game selection
-│   │   └── Radio.jsx              # Main radio interface
-│   ├── animations/                # Animation configurations
-│   │   └── motionPresets.js       # Framer Motion presets
-│   ├── App.jsx                    # Main application component with routing
-│   ├── index.css                  # Global styles and Tailwind imports
-│   └── main.jsx                   # React application entry point
-├── scripts/                       # Build and deployment scripts
-├── eslint.config.js              # ESLint configuration
-├── index.html                    # HTML template
-├── package.json                  # Dependencies and scripts
-├── tailwind.config.js            # Tailwind CSS configuration
-├── vercel.json                   # Vercel deployment configuration
-└── vite.config.js                # Vite build configuration
 ```
 
 ## Adding Radio Stations
@@ -195,18 +137,17 @@ src/assets/games/vc/
 ├── vc-banner.png        # Game banner for cards
 └── vc-bg.png           # Background image
 
-# Import in games.js
+# Import in src/data/games/vc.js
 import vcLogo from '../assets/games/vc/vc-logo.png';
 import vcBanner from '../assets/games/vc/vc-banner.png';
 import vcBackground from '../assets/games/vc/vc-bg.png';
 ```
 
 ### 2. Update Game Data
-Add station data to `src/data/games.js`:
+Add station data to the game module in `src/data/games/` (for example `src/data/games/vcs.js`):
 
 ```javascript
-export const games = {
-  vcs: {
+export const vcsGame = {
     logo: vcsLogo,        // Use imported assets
     banner: vcsBanner,    // For game card backgrounds
     background: vcsBackground, // For page backgrounds
@@ -224,7 +165,6 @@ export const games = {
       }
     ]
   }
-}
 ```
 
 ### 3. Audio Requirements
