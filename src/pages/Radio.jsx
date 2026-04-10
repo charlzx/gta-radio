@@ -65,6 +65,7 @@ export default function Radio() {
     getDuration,
   } = useYouTubeRadioPlayer();
   const mainRef = useRef(null);
+  const wasPlayingBeforeHideRef = useRef(false);
   // Leave single-game view when searching globally
   useEffect(() => {
     if (searchQuery && selectedGameView) {
@@ -358,6 +359,25 @@ export default function Radio() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [togglePlayPause, handleToggleMute, goToPreviousTrack, goToNextTrack]);
+
+  // Some browsers throttle/pause media in background tabs; restore live playback when visible again.
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        wasPlayingBeforeHideRef.current = isPlaying;
+        return;
+      }
+
+      if (!wasPlayingBeforeHideRef.current) return;
+      if (!currentStation || !isPlayerReady) return;
+
+      playAtEpoch(currentStation.duration);
+      wasPlayingBeforeHideRef.current = false;
+    };
+
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, [isPlaying, currentStation, isPlayerReady, playAtEpoch]);
 
   // Dynamic title update based on what's playing
   useEffect(() => {
