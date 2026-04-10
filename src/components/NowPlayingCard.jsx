@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Maximize2, SkipBack, SkipForward, ListMusic } from 'lucide-react';
+import { Maximize2, SkipBack, SkipForward, ListMusic, Repeat, Shuffle } from 'lucide-react';
 import PlayPauseButton from './PlayPauseButton';
 import VolumeControl from './VolumeControl';
 
@@ -23,11 +23,17 @@ const NowPlayingCard = ({
   isSynced,
   onGoLive,
   onOpenPlaylist,
+  loopOnEnd,
+  shuffleOnEnd,
+  onToggleLoopOnEnd,
+  onToggleShuffleOnEnd,
 }) => {
   const progressPct = useMemo(() => {
     if (!duration || duration <= 0) return 0;
     return Math.min(100, Math.max(0, (currentTime / duration) * 100));
   }, [currentTime, duration]);
+
+  const stationMeta = currentStation?.stationMeta || null;
 
   const { nextTrack, laterTrack } = useMemo(() => {
     const fallback = { nextTrack: null, laterTrack: null };
@@ -134,15 +140,18 @@ const NowPlayingCard = ({
           <div className="flex-1 min-w-0">
             <div className="text-white font-bold truncate">{currentStation.name}</div>
             <div className="text-[11px] text-gray-400">{currentGame.name}</div>
-            <div className="text-pink-300 text-sm truncate mt-0.5">
-              {nowPlaying?.type === 'Song' && nowPlaying.artist ? `${nowPlaying.artist} — ${nowPlaying.title}` : nowPlaying?.title || 'Tuned' }
-            </div>
           </div>
         </div>
+
       </div>
 
-      {/* Card 2: Progress + Transport */}
+      {/* Card 2: Live Now Playing */}
       <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg p-4">
+        <div className="text-[11px] uppercase tracking-wide text-gray-400 mb-2">Live Now Playing</div>
+        <div className="text-sm text-pink-300 truncate">
+          {nowPlaying?.type === 'Song' && nowPlaying.artist ? `${nowPlaying.artist} — ${nowPlaying.title}` : nowPlaying?.title || 'Tuned'}
+        </div>
+        <div className="text-xs text-gray-400 mt-0.5 mb-2">{nowPlaying?.type || 'Info'}</div>
         <div className="flex justify-between text-[11px] text-gray-400">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
@@ -172,7 +181,18 @@ const NowPlayingCard = ({
         </div>
       </div>
 
-      {/* Card 3: Volume */}
+      {/* Card 3: Host */}
+      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg p-4">
+        <div className="text-[11px] uppercase tracking-wide text-gray-400 mb-1">Host</div>
+        <div className="text-sm text-white font-semibold">
+          {stationMeta?.host?.name || 'Unknown host'}
+        </div>
+        {stationMeta?.host?.style && (
+          <div className="text-xs text-gray-300 mt-0.5">{stationMeta.host.style}</div>
+        )}
+      </div>
+
+      {/* Card 4: Volume */}
       <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg p-4">
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-300 font-medium">Volume</div>
@@ -188,7 +208,41 @@ const NowPlayingCard = ({
         </div>
       </div>
 
-      {/* Card 4: Up Next */}
+      {/* Card 5: Playback Modes */}
+      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="text-sm text-gray-300 font-medium">Playback Modes</div>
+          <div className="text-[11px] text-gray-400">When station ends</div>
+        </div>
+        <div className="flex items-center justify-center gap-2">
+          <button
+            onClick={onToggleLoopOnEnd}
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+              loopOnEnd
+                ? 'bg-pink-600 text-white border-pink-500'
+                : 'bg-white/5 text-gray-300 border-white/15 hover:bg-white/10'
+            }`}
+            aria-pressed={loopOnEnd}
+            aria-label="Loop current station when it ends"
+          >
+            <Repeat size={14} /> Loop End
+          </button>
+          <button
+            onClick={onToggleShuffleOnEnd}
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+              shuffleOnEnd
+                ? 'bg-pink-600 text-white border-pink-500'
+                : 'bg-white/5 text-gray-300 border-white/15 hover:bg-white/10'
+            }`}
+            aria-pressed={shuffleOnEnd}
+            aria-label="Shuffle to a different station when this one ends"
+          >
+            <Shuffle size={14} /> Shuffle End
+          </button>
+        </div>
+      </div>
+
+      {/* Card 6: Up Next */}
       <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg p-4">
         <div className="flex items-center justify-between gap-2">
           <div className="text-sm font-semibold text-white">Up Next</div>

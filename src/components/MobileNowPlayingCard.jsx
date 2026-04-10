@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { SkipBack, SkipForward, ChevronDown, List } from 'lucide-react';
+import { SkipBack, SkipForward, ChevronDown, List, Repeat, Shuffle } from 'lucide-react';
 import PlayPauseButton from './PlayPauseButton';
 import VolumeControl from './VolumeControl';
 
@@ -22,6 +22,10 @@ const MobileNowPlayingCard = ({
   isSynced,
   onGoLive,
   onOpenPlaylist,
+  loopOnEnd,
+  shuffleOnEnd,
+  onToggleLoopOnEnd,
+  onToggleShuffleOnEnd,
 }) => {
   const progressPct = useMemo(() => {
     if (!duration || duration <= 0) return 0;
@@ -125,6 +129,18 @@ const MobileNowPlayingCard = ({
       {/* Transport Controls */}
       <div className="flex items-center justify-center gap-6 mb-6">
         <button
+          onClick={onToggleLoopOnEnd}
+          className={`rounded-full p-2 border transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none ${
+            loopOnEnd
+              ? 'text-pink-200 bg-pink-500/30 border-pink-400 shadow-[0_0_0_1px_rgba(236,72,153,0.35)]'
+              : 'text-gray-400 border-white/15 hover:text-white hover:bg-white/10'
+          }`}
+          aria-pressed={loopOnEnd}
+          aria-label="Loop current station when it ends"
+        >
+          <Repeat size={20} />
+        </button>
+        <button
           onClick={onPreviousTrack}
           className="rounded-full bg-transparent text-white transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none"
           aria-label="Previous"
@@ -138,6 +154,18 @@ const MobileNowPlayingCard = ({
           aria-label="Next"
         >
           <SkipForward size={40} strokeWidth={2} fill="white" />
+        </button>
+        <button
+          onClick={onToggleShuffleOnEnd}
+          className={`rounded-full p-2 border transition-all duration-300 ease-in-out transform hover:scale-110 focus:outline-none ${
+            shuffleOnEnd
+              ? 'text-pink-200 bg-pink-500/30 border-pink-400 shadow-[0_0_0_1px_rgba(236,72,153,0.35)]'
+              : 'text-gray-400 border-white/15 hover:text-white hover:bg-white/10'
+          }`}
+          aria-pressed={shuffleOnEnd}
+          aria-label="Shuffle to a different station when this one ends"
+        >
+          <Shuffle size={20} />
         </button>
       </div>
 

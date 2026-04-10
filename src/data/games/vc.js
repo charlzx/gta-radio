@@ -15,6 +15,28 @@ export const vcGame = {
       audioUrl: null,
       youtubeUrl: '2KOTYup9mVA',
       duration: 3780,
+      stationMeta: {
+        info: {
+          genre: 'Disco, soul, R&B, funk',
+          yearsActiveInLore: '1984-1986',
+          city: 'Vice City',
+          about:
+            'Fever 105 is the Vice City disco and soul station hosted by Oliver Biscuit. It runs as a continuous-mix station with disco, soul, R&B, and funk. The station leans into a sensual, Barry White-inspired persona and frames itself as a groove-heavy alternative to the city\'s harder rock and pop stations.',
+          shortDescription:
+            'Fever 105 is Vice City\'s disco and funk station, led by Oliver Biscuit and built around a smooth, club-ready sound.',
+          notableTraits: [
+            'Continuity successor to Fresh 105 FM frequency',
+            'Strong nightclub crossover vibe',
+            'Signature hedonistic 80s tone',
+          ],
+        },
+        host: {
+          name: 'Oliver "Ladykiller" Biscuit',
+          actor: 'Julius Dyson',
+          bio: 'A soulful, romantic radio persona that defines Fever 105\'s identity in Vice City.',
+          style: 'Suave, smooth, and confident.',
+        },
+      },
       tracklist: [
         { type: 'Song', artist: 'The Whispers', title: 'And the Beat Goes On', startTime: 4, endTime: 272 },
         { type: 'Song', artist: 'Fat Larry\'s Band', title: 'Act Like You Know', startTime: 272, endTime: 560 },

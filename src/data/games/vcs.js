@@ -25,6 +25,24 @@ export const vcsGame = {
       audioUrl: 'https://ilotriyjo9w6fmk1.public.blob.vercel-storage.com/flashfm.mp3',
       youtubeUrl: 'L0ejZEUwSeg',
       duration: 3891,
+      stationMeta: {
+        info: {
+          genre: '1980s pop, synth-pop, rock',
+          yearsActiveInLore: '1984-1986',
+          city: 'Vice City',
+          about:
+            'Flash FM returns in GTA Vice City Stories as a co-hosted pop station. Toni and Teri front the show in 1984, and Toni becomes the sole host by 1986. The station keeps the same mainstream pop identity as the Vice City version but adds a sharper on-air back-and-forth.',
+          shortDescription:
+            'Flash FM is Vice City\'s mainstream pop station, with fast-paced on-air banter and chart-heavy 80s rotation.',
+          notableTraits: ['Top-40 tone', 'Co-host era in 1984', 'Recurring station across VC timeline'],
+        },
+        host: {
+          name: 'Teri',
+          actor: 'Zan Aron',
+          bio: 'Primary 1984 host with a sharp, snarky delivery.',
+          style: 'Brash, witty, and confrontational.',
+        },
+      },
       tracklist: [
         { type: 'Song', artist: 'Laura Branigan', title: 'Gloria', startTime: 0, endTime: 253 },
         { type: 'Song', artist: 'Rick Springfield', title: 'Human Touch', startTime: 253, endTime: 482 },
@@ -53,6 +71,24 @@ export const vcsGame = {
       audioUrl: 'https://ilotriyjo9w6fmk1.public.blob.vercel-storage.com/vrock.mp3',
       youtubeUrl: 'L0ejZEUwSeg',
       duration: 3581,
+      stationMeta: {
+        info: {
+          genre: 'Hard rock, heavy metal',
+          yearsActiveInLore: '1984-1986',
+          city: 'Vice City',
+          about:
+            'V-Rock is the rock station in GTA Vice City Stories. In 1984 it is based in Reddick, Florida and co-hosted by Couzin Ed and Lazlow; by 1986 it has moved to Vice City and Lazlow is alone on-air. The station keeps the same hard rock and heavy metal identity, with antagonistic promos and a vulture mascot.',
+          shortDescription:
+            'V-Rock is the loud, abrasive hard rock station in Vice City Stories, centered on metal and attitude.',
+          notableTraits: ['Couzin Ed-led in 1984', 'Lazlow intern continuity', 'Aggressive station branding'],
+        },
+        host: {
+          name: 'Couzin Ed',
+          actor: 'Couzin Ed (as himself)',
+          bio: 'The main 1984 V-Rock personality, later replaced by Lazlow in VC timeline continuity.',
+          style: 'Combative, macho, and relentless.',
+        },
+      },
       tracklist: [
         { type: 'Song', artist: 'Dio', title: 'Holy Diver', startTime: 32, endTime: 267 },
         { type: 'Song', artist: 'Queensrÿche', title: 'Queen of the Reich', startTime: 267, endTime: 592 },
@@ -76,6 +112,24 @@ export const vcsGame = {
       audioUrl: null,
       youtubeUrl: 'on8PwFZCep0',
       duration: 4200,
+      stationMeta: {
+        info: {
+          genre: 'Power ballads, soft rock',
+          yearsActiveInLore: '1984-1986',
+          city: 'Vice City',
+          about:
+            'Emotion 98.3 returns in GTA Vice City Stories with Lionel Makepeace on air. It plays soft pop, power ballads, and soft rock. Compared with Fernando Martinez\'s later Vice City version, the VCS incarnation leans more into Lionel\'s wounded-romantic personality and listener-begging tone.',
+          shortDescription:
+            'Emotion 98.3 is the romantic soft-pop station with heartbreak-heavy monologues and late-night mood.',
+          notableTraits: ['Love-and-loss format', '1984 co-host dynamic', 'Recurring Emotion continuity'],
+        },
+        host: {
+          name: 'Lionel Makepeace',
+          actor: 'Steve Stratton',
+          bio: 'A melancholy host whose vulnerable tone defines the 1984 version of Emotion 98.3.',
+          style: 'Soft, introspective, and emotional.',
+        },
+      },
       tracklist: [
         { type: 'Song', artist: 'The Motels', title: 'Only the Lonely', startTime: 7, endTime: 174 },
         { type: 'Song', artist: '10cc', title: "I'm Not in Love", startTime: 174, endTime: 486 },
@@ -103,6 +157,24 @@ export const vcsGame = {
       audioUrl: null,
       youtubeUrl: 'NDnVROj95lM',
       duration: 3660,
+      stationMeta: {
+        info: {
+          genre: 'New wave, synth-pop, post-punk',
+          yearsActiveInLore: '1981-1986',
+          city: 'Vice City',
+          about:
+            'Wave 103 returns in GTA Vice City Stories as The Wave 103. It started broadcasting in 1981 and is co-hosted by Adam First and Trish Camden in 1984. The station keeps its new wave, synth-pop, and post-punk identity while using a more argumentative two-host setup.',
+          shortDescription:
+            'The Wave 103 delivers Vice City\'s new wave and synth-pop sound with detached style and scene-driven commentary.',
+          notableTraits: ['Started in 1981 in lore', 'Co-host setup in VCS', 'Anti-mainstream imaging'],
+        },
+        host: {
+          name: 'Trish Camden',
+          actor: null,
+          bio: 'Primary co-host in the 1984 timeline, sharing duties with Adam First.',
+          style: 'Cool, understated, and opinionated.',
+        },
+      },
       tracklist: [
         { type: 'Song', artist: 'The Human League', title: 'Love Action (I Believe in Love)', startTime: 10, endTime: 280 },
         { type: 'Song', artist: 'Thompson Twins', title: 'Love on Your Side', startTime: 280, endTime: 562 },
@@ -128,6 +200,24 @@ export const vcsGame = {
       audioUrl: null,
       youtubeUrl: 'Ti360Mx_0aE',
       duration: 2460,
+      stationMeta: {
+        info: {
+          genre: 'Post-disco, disco, jazz-funk',
+          yearsActiveInLore: '1984',
+          city: 'Vice City',
+          about:
+            'Paradise FM is a music-only station in GTA Vice City Stories. It plays post-disco, disco, and jazz-funk. Available sources describe it as a continuous mix with no DJ, making it structurally different from the personality-led stations on the Vice City dial.',
+          shortDescription:
+            'Paradise FM is a music-driven disco and jazz-funk station in VCS without a named on-air DJ.',
+          notableTraits: ['VCS-exclusive station', 'No host personality segments', 'Dancefloor-focused curation'],
+        },
+        host: {
+          name: null,
+          actor: null,
+          bio: null,
+          style: null,
+        },
+      },
       tracklist: [
         { type: 'Song', artist: 'Unlimited Touch', title: 'I Hear Music in the Streets', startTime: 1, endTime: 178 },
         { type: 'Song', artist: 'Plunky & the Oneness of Juju', title: 'Everyway but Loose (Larry Levan remix)', startTime: 178, endTime: 417 },
@@ -151,6 +241,24 @@ export const vcsGame = {
       audioUrl: null,
       youtubeUrl: 'gQlsIr8wTN0',
       duration: 2120,
+      stationMeta: {
+        info: {
+          genre: 'Soul, funk, disco, quiet storm, R&B',
+          yearsActiveInLore: '1984',
+          city: 'Vice City',
+          about:
+            'Vice City For Lovers is a soul and R&B station in GTA Vice City Stories. It is hosted by Tina Jane and plays soul, funk, disco, quiet storm, and R&B. The station is built around romance, listener requests, and urban adult contemporary framing.',
+          shortDescription:
+            'Vice City For Lovers (VCFL) is a romance-first adult contemporary station with smooth soul and dedication vibes.',
+          notableTraits: ['Quiet storm format parody', 'Request-driven feel', 'VCS-exclusive identity'],
+        },
+        host: {
+          name: 'Tina Jane',
+          actor: 'Pat Floyd',
+          bio: 'VCFL host known for intimate call-ins and romantic framing between songs.',
+          style: 'Sultry, relaxed, and playful.',
+        },
+      },
       tracklist: [
         { type: 'Song', artist: 'Marvin Gaye', title: 'Sexual Healing', startTime: 0, endTime: 201 },
         { type: 'Song', artist: 'Earth, Wind & Fire', title: 'Fantasy', startTime: 201, endTime: 447 },
@@ -171,6 +279,24 @@ export const vcsGame = {
       audioUrl: null,
       youtubeUrl: 'PR61dYsqCBQ',
       duration: 1800,
+      stationMeta: {
+        info: {
+          genre: 'Old-school hip-hop, electro, breakbeat',
+          yearsActiveInLore: '1984',
+          city: 'Vice City',
+          about:
+            'Fresh 105 FM is the hip-hop, electro, and breakbeat station in GTA Vice City Stories. It is hosted by Luke Campbell and broadcasts from the Malibu Club in Vice Point. The station is notable for having no sponsor and a freer, more uncensored on-air style.',
+          shortDescription:
+            'Fresh 105 FM is a pirate hip-hop station in VCS known for uncensored energy and club-based broadcast identity.',
+          notableTraits: ['No-sponsor style', 'Malibu Club broadcast lore', 'Predecessor to Fever 105 timeline'],
+        },
+        host: {
+          name: 'Luke Campbell',
+          actor: 'Luke Campbell (as himself)',
+          bio: 'A real-world rap figure represented as Fresh 105 FM\'s unfiltered on-air personality.',
+          style: 'Raw, loud, and rebellious.',
+        },
+      },
       tracklist: [
         { type: 'Song', artist: 'Afrika Bambaataa & the Soul Sonic Force', title: 'Renegades of Funk', startTime: 1, endTime: 188 },
         { type: 'Song', artist: 'Jonzun Crew', title: 'Pack Jam (Look Out for the OVC)', startTime: 188, endTime: 345 },
@@ -191,6 +317,24 @@ export const vcsGame = {
       audioUrl: null,
       youtubeUrl: 'Y2ZxIkZANks',
       duration: 1680,
+      stationMeta: {
+        info: {
+          genre: 'Latin jazz, son, mambo, salsa',
+          yearsActiveInLore: '1984-1986',
+          city: 'Vice City',
+          about:
+            'Radio Espantoso returns in GTA Vice City Stories as the city\'s Latin station. In 1984 it is hosted by Hector Hernandez; by 1986 Pepe is the DJ in Vice City. The station keeps its Latin jazz, mambo, son, salsa, and Latin funk identity while shifting hosts between periods.',
+          shortDescription:
+            'Radio Espantoso is Vice City\'s Latin station, combining energetic salsa-era classics with strong Spanish-language identity.',
+          notableTraits: ['Bilingual presentation', 'Host changed by 1986', 'Latin club and dance emphasis'],
+        },
+        host: {
+          name: 'Hector Hernandez',
+          actor: 'Frank Rodriguez',
+          bio: 'The 1984-era Espantoso host known for boastful, theatrical bilingual segments.',
+          style: 'Boisterous and theatrical.',
+        },
+      },
       tracklist: [
         { type: 'Song', artist: 'Ray Barretto', title: 'Acid', startTime: 1, endTime: 204 },
         { type: 'Song', artist: 'Pete El Conde Rodriguez', title: 'I Like It (I Like It Like That)', startTime: 204, endTime: 465 },
@@ -209,6 +353,24 @@ export const vcsGame = {
       audioUrl: null,
       youtubeUrl: 'LDYWoG-l5q4',
       duration: 3660,
+      stationMeta: {
+        info: {
+          genre: 'Public talk radio',
+          yearsActiveInLore: '1984-1986',
+          city: 'Vice City',
+          about:
+            'Vice City Public Radio returns in GTA Vice City Stories as the city\'s talk-radio network. The station includes multiple shows such as Bait and Switch, New World Order, Moorehead Rides Again, and Pressing Issues. The format stays satirical and argumentative, but the VCS version broadens the station beyond a single flagship program.',
+          shortDescription:
+            'VCPR is Vice City\'s satirical public talk network, featuring debates, call-ins, and scripted radio-show parody.',
+          notableTraits: ['Multi-program lineup in 1984', 'Talk-only format', 'Public radio satire'],
+        },
+        host: {
+          name: 'Maurice Chavez',
+          actor: 'Philip Anthony Rodriguez',
+          bio: 'Host of Pressing Issues and one of the key recurring voices on VCPR.',
+          style: 'Formal moderation that slowly unravels into chaos.',
+        },
+      },
       tracklist: [
         { type: 'DJ', artist: 'Maurice Chavez', title: 'Pressing Issues', startTime: 2, endTime: 1056 },
         { type: 'DJ', artist: 'Larry Joe and Bobbie Ray', title: 'Bait and Switch', startTime: 1056, endTime: 1902 },
