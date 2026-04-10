@@ -43,7 +43,7 @@ export const games = {
         id: 'vcs-flash',
         name: 'Flash FM',
         logo: flashFMLogo,
-        audioUrl: 'https://ilotriyjo9w6fmk1.public.blob.vercel-storage.com/flashfm.mp3',
+        audioUrl: 'https://www.youtube.com/watch?v=4xDzrJKXOOY',
         duration: 3891,
         tracklist: [
           { type: 'Song', artist: 'Laura Branigan', title: 'Gloria', startTime: 0, endTime: 253 },
@@ -70,7 +70,7 @@ export const games = {
         id: 'vcs-vrock',
         name: 'V-Rock',
         logo: vRockLogo,
-        audioUrl: 'https://ilotriyjo9w6fmk1.public.blob.vercel-storage.com/vrock.mp3',
+        audioUrl: 'https://www.youtube.com/watch?v=tAGnKpE4NCI',
         duration: 3581,
         tracklist: [
           { type: 'Song', artist: 'Dio', title: 'Holy Diver', startTime: 32, endTime: 267 },

@@ -12,7 +12,7 @@ import SearchFilter from '../components/SearchFilter';
 import RecentlyPlayedCard from '../components/RecentlyPlayedCard';
 import MiniPlayer from '../components/MiniPlayer';
 import PlaylistView from '../components/PlaylistView';
-import { useRadioPlayer } from '../hooks/useRadioPlayer';
+import { useYouTubeRadioPlayer } from '../hooks/useYouTubeRadioPlayer';
 import { useIsMobile } from '../hooks/useIsMobile';
 
 export default function Radio() {
@@ -45,7 +45,24 @@ export default function Radio() {
   const [showMiniPlayer, setShowMiniPlayer] = useState(false);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
 
-  const { audioRef, isPlaying, volume, isMuted, setVol, toggleMute, playAtEpoch, pause, syncToEpoch, setActiveDuration, attachMediaSession } = useRadioPlayer();
+  const {
+    playerMountRef,
+    isPlayerReady,
+    isPlaying,
+    volume,
+    isMuted,
+    setVol,
+    toggleMute,
+    playAtEpoch,
+    pause,
+    syncToEpoch,
+    setActiveDuration,
+    attachMediaSession,
+    loadFromUrl,
+    seekTo,
+    getCurrentTime,
+    getDuration,
+  } = useYouTubeRadioPlayer();
   const mainRef = useRef(null);
   // Leave single-game view when searching globally
   useEffect(() => {
@@ -152,16 +169,16 @@ export default function Radio() {
   };
 
   const goLive = () => {
-    if (currentStation && audioRef.current) {
+    if (currentStation && isPlayerReady) {
       setIsSynced(true);
       playAtEpoch(currentStation.duration);
     }
   };
   
   const handleTrackClick = (startTime) => {
-    if (audioRef.current && Number.isFinite(startTime)) {
+    if (Number.isFinite(startTime)) {
       setIsSynced(false); // Disable sync when manually jumping to track
-      audioRef.current.currentTime = startTime;
+      seekTo(startTime);
       setIsPlaylistOpen(false); // Close playlist after selection
     }
   };
@@ -186,18 +203,17 @@ export default function Radio() {
     addToRecentlyPlayed(station);
   };
 
-  // Start playback once the current station audio is ready, and always clean up previous listeners.
+  // Load YouTube video when station changes.
   useEffect(() => {
-    const audioElement = audioRef.current;
-    if (!audioElement || !currentStation?.audioUrl || !currentStation?.duration) return undefined;
+    if (!currentStation?.audioUrl) return;
+    loadFromUrl(currentStation.audioUrl);
+  }, [currentStation, loadFromUrl]);
 
-    const handleCanPlay = () => {
-      playAtEpoch(currentStation.duration);
-    };
-
-    audioElement.addEventListener('canplay', handleCanPlay);
-    return () => audioElement.removeEventListener('canplay', handleCanPlay);
-  }, [audioRef, currentStation, playAtEpoch]);
+  // Autoplay synced position once the YouTube player is ready.
+  useEffect(() => {
+    if (!currentStation || !isPlayerReady) return;
+    playAtEpoch(currentStation.duration);
+  }, [currentStation, isPlayerReady, playAtEpoch]);
 
   // Mobile-specific handlers
   const handleMobilePlayerExpand = () => {
@@ -224,91 +240,76 @@ export default function Radio() {
   }, []);
 
   const togglePlayPause = useCallback(() => {
-    if (!currentStation || !audioRef.current) return;
+    if (!currentStation || !isPlayerReady) return;
     if (isPlaying) return pause();
     playAtEpoch(currentStation.duration);
-  }, [currentStation, audioRef, isPlaying, pause, playAtEpoch]);
+  }, [currentStation, isPlayerReady, isPlaying, pause, playAtEpoch]);
 
   const goToNextTrack = useCallback(() => {
-    if (!currentStation?.tracklist || !audioRef.current) return;
+    if (!currentStation?.tracklist) return;
     setIsSynced(false); // Disable sync when user manually navigates
+    const playerTime = getCurrentTime();
     const currentTrack = currentStation.tracklist.find(t => 
-      audioRef.current.currentTime >= t.startTime && 
-      audioRef.current.currentTime < t.endTime
+      playerTime >= t.startTime && 
+      playerTime < t.endTime
     );
     if (currentTrack) {
       const currentIndex = currentStation.tracklist.indexOf(currentTrack);
       const nextTrack = currentStation.tracklist[currentIndex + 1];
       if (nextTrack) {
-        audioRef.current.currentTime = nextTrack.startTime;
+        seekTo(nextTrack.startTime);
       }
     }
-  }, [currentStation, audioRef]);
+  }, [currentStation, getCurrentTime, seekTo]);
 
   const goToPreviousTrack = useCallback(() => {
-    if (!currentStation?.tracklist || !audioRef.current) return;
+    if (!currentStation?.tracklist) return;
     setIsSynced(false); // Disable sync when user manually navigates
+    const playerTime = getCurrentTime();
     const currentTrack = currentStation.tracklist.find(t => 
-      audioRef.current.currentTime >= t.startTime && 
-      audioRef.current.currentTime < t.endTime
+      playerTime >= t.startTime && 
+      playerTime < t.endTime
     );
     if (currentTrack) {
       const currentIndex = currentStation.tracklist.indexOf(currentTrack);
       if (currentIndex > 0) {
         const prevTrack = currentStation.tracklist[currentIndex - 1];
-        audioRef.current.currentTime = prevTrack.startTime;
+        seekTo(prevTrack.startTime);
       } else {
         // Go to beginning of current track if already at first track
-        audioRef.current.currentTime = currentTrack.startTime;
+        seekTo(currentTrack.startTime);
       }
     }
-  }, [currentStation, audioRef]);
+  }, [currentStation, getCurrentTime, seekTo]);
   
   useEffect(() => {
-  const audioElement = audioRef.current;
+    if (!currentStation) {
+      setCurrentTime(0);
+      setDuration(0);
+      return undefined;
+    }
+
     const updateNowPlaying = () => {
-        if (!audioElement || !currentStation?.tracklist) return;
-        setCurrentTime(audioElement.currentTime);
-        const currentTrack = currentStation.tracklist.find(t => audioElement.currentTime >= t.startTime && audioElement.currentTime < t.endTime);
-        if (currentTrack && currentTrack.title !== nowPlaying.title) setNowPlaying(currentTrack);
-    };
-    
-    const updateDuration = () => {
-      if (audioElement && currentStation) {
-    setDuration(currentStation.duration);
-    setActiveDuration(currentStation.duration);
-      }
-    };
-    
-    const handleEnded = () => {
-      // Loop the audio when it ends
-      if (audioElement && currentStation && isPlaying) {
-        playAtEpoch(currentStation.duration);
+      const playerTime = getCurrentTime();
+      setCurrentTime(playerTime);
+
+      const stationDuration = Number(currentStation.duration) || getDuration() || 0;
+      setDuration(stationDuration);
+      setActiveDuration(stationDuration);
+
+      if (!currentStation?.tracklist) return;
+      const currentTrack = currentStation.tracklist.find(
+        (t) => playerTime >= t.startTime && playerTime < t.endTime
+      );
+      if (currentTrack && currentTrack.title !== nowPlaying.title) {
+        setNowPlaying(currentTrack);
       }
     };
 
-    if (audioElement) {
-      // Set initial volume and mute state
-      audioElement.volume = volume;
-      audioElement.muted = isMuted;
-      
-      audioElement.addEventListener('timeupdate', updateNowPlaying);
-      audioElement.addEventListener('loadedmetadata', updateDuration);
-      audioElement.addEventListener('durationchange', updateDuration);
-      audioElement.addEventListener('ended', handleEnded);
-      // Run immediately to populate Now Playing as soon as station/audio is set
-      updateNowPlaying();
-    }
-    
-    return () => { 
-      if (audioElement) {
-        audioElement.removeEventListener('timeupdate', updateNowPlaying);
-        audioElement.removeEventListener('loadedmetadata', updateDuration);
-        audioElement.removeEventListener('durationchange', updateDuration);
-        audioElement.removeEventListener('ended', handleEnded);
-      }
-    };
-  }, [currentStation, nowPlaying.title, volume, isMuted, setActiveDuration, isPlaying, playAtEpoch, audioRef]);
+    updateNowPlaying();
+    const id = setInterval(updateNowPlaying, 250);
+    return () => clearInterval(id);
+  }, [currentStation, nowPlaying.title, setActiveDuration, getCurrentTime, getDuration]);
 
   // Periodic drift correction only while in synced mode
   useEffect(() => {
@@ -790,9 +791,9 @@ export default function Radio() {
           onVolumeChange={handleVolumeChange}
           onToggleMute={handleToggleMute}
           onSeek={(t) => {
-            if (audioRef.current && Number.isFinite(t)) {
+            if (Number.isFinite(t)) {
               setIsSynced(false);
-              audioRef.current.currentTime = Math.max(0, Math.min(duration || 0, t));
+              seekTo(Math.max(0, Math.min(duration || 0, t)));
             }
           }}
           isSynced={isSynced}
@@ -856,7 +857,7 @@ export default function Radio() {
         </div>
       )}
       
-      <audio ref={audioRef} src={currentStation?.audioUrl} crossOrigin="anonymous"></audio>
+      <div ref={playerMountRef} className="fixed w-0 h-0 overflow-hidden opacity-0 pointer-events-none" aria-hidden="true" />
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap');
