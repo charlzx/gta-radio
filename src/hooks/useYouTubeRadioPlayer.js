@@ -73,6 +73,7 @@ function extractYouTubeVideoId(url) {
 export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = {}) {
   const playerMountRef = useRef(null);
   const playerRef = useRef(null);
+  const audioRef = useRef(null);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -89,27 +90,47 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
   const activeDurationRef = useRef(0);
   const currentVideoIdRef = useRef(null);
   const durationRef = useRef(0);
+  const modeRef = useRef('none');
+  const loadRequestIdRef = useRef(0);
+  const playRequestIdRef = useRef(0);
 
   const setActiveDuration = useCallback((d) => {
     activeDurationRef.current = Number(d) || 0;
   }, []);
 
   const getCurrentTime = useCallback(() => {
+    if (modeRef.current === 'audio') {
+      return Number(audioRef.current?.currentTime) || 0;
+    }
+
     const p = playerRef.current;
     if (!p || typeof p.getCurrentTime !== 'function') return 0;
     return Number(p.getCurrentTime()) || 0;
   }, []);
 
   const getDuration = useCallback(() => {
+    if (modeRef.current === 'audio') {
+      return Number(audioRef.current?.duration) || 0;
+    }
+
     const p = playerRef.current;
     if (!p || typeof p.getDuration !== 'function') return 0;
     return Number(p.getDuration()) || 0;
   }, []);
 
   const seekTo = useCallback((seconds) => {
+    const target = Math.max(0, Number(seconds) || 0);
+
+    if (modeRef.current === 'audio') {
+      const a = audioRef.current;
+      if (!a) return;
+      a.currentTime = target;
+      return;
+    }
+
     const p = playerRef.current;
     if (!p || typeof p.seekTo !== 'function') return;
-    p.seekTo(Math.max(0, Number(seconds) || 0), true);
+    p.seekTo(target, true);
   }, []);
 
   const syncToEpoch = useCallback((durationSeconds) => {
@@ -121,49 +142,59 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
   }, [seekTo]);
 
   const playAtEpoch = useCallback(async (durationSeconds) => {
-    const p = playerRef.current;
-    if (!p || !isPlayerReady) return;
+    if (!isPlayerReady) return;
+
+    playRequestIdRef.current += 1;
+    const requestId = playRequestIdRef.current;
     syncToEpoch(durationSeconds);
-    if (typeof p.playVideo === 'function') {
+
+    if (modeRef.current === 'audio') {
+      const a = audioRef.current;
+      if (!a) return;
+      try {
+        await a.play();
+        if (requestId !== playRequestIdRef.current) return;
+        setIsPlaying(true);
+      } catch (e) {
+        if (e?.name !== 'AbortError') {
+          console.error('Playback failed:', e);
+        }
+        setIsPlaying(false);
+      }
+      return;
+    }
+
+    const p = playerRef.current;
+    if (p && typeof p.playVideo === 'function') {
       p.playVideo();
       setIsPlaying(true);
     }
   }, [isPlayerReady, syncToEpoch]);
 
   const pause = useCallback(() => {
+    playRequestIdRef.current += 1;
+
+    if (modeRef.current === 'audio') {
+      const a = audioRef.current;
+      if (!a) return;
+      a.pause();
+      setIsPlaying(false);
+      return;
+    }
+
     const p = playerRef.current;
     if (!p || typeof p.pauseVideo !== 'function') return;
     p.pauseVideo();
     setIsPlaying(false);
   }, []);
 
-  const setVol = useCallback((v) => {
-    const next = Math.max(0, Math.min(1, Number(v) || 0));
-    setVolume(next);
-    localStorage.setItem('gta-radio-volume', next.toString());
-
-    const p = playerRef.current;
-    if (p && typeof p.setVolume === 'function') {
-      p.setVolume(Math.round(next * 100));
-    }
-  }, []);
-
-  const toggleMute = useCallback(() => {
-    setIsMuted((m) => {
-      const next = !m;
-      localStorage.setItem('gta-radio-muted', next.toString());
-
-      const p = playerRef.current;
-      if (p) {
-        if (next && typeof p.mute === 'function') p.mute();
-        if (!next && typeof p.unMute === 'function') p.unMute();
-      }
-
-      return next;
-    });
-  }, []);
-
   const applyPlayerAudioSettings = useCallback(() => {
+    const a = audioRef.current;
+    if (a) {
+      a.volume = volume;
+      a.muted = isMuted;
+    }
+
     const p = playerRef.current;
     if (!p) return;
 
@@ -178,61 +209,154 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
     }
   }, [volume, isMuted]);
 
-  const loadFromUrl = useCallback(async (url) => {
+  const setVol = useCallback((v) => {
+    const next = Math.max(0, Math.min(1, Number(v) || 0));
+    setVolume(next);
+    localStorage.setItem('gta-radio-volume', next.toString());
+
+    if (modeRef.current === 'audio') {
+      const a = audioRef.current;
+      if (a) a.volume = next;
+      return;
+    }
+
+    const p = playerRef.current;
+    if (p && typeof p.setVolume === 'function') {
+      p.setVolume(Math.round(next * 100));
+    }
+  }, []);
+
+  const toggleMute = useCallback(() => {
+    setIsMuted((m) => {
+      const next = !m;
+      localStorage.setItem('gta-radio-muted', next.toString());
+
+      const a = audioRef.current;
+      if (a) {
+        a.muted = next;
+      }
+
+      const p = playerRef.current;
+      if (p) {
+        if (next && typeof p.mute === 'function') p.mute();
+        if (!next && typeof p.unMute === 'function') p.unMute();
+      }
+
+      return next;
+    });
+  }, []);
+
+  const loadFromUrl = useCallback(async (url, options = {}) => {
+    const requestId = ++loadRequestIdRef.current;
+    const autoPlayDuration = Number(options?.autoPlayDuration) || 0;
     const videoId = extractYouTubeVideoId(url);
-    if (!videoId || !playerMountRef.current) {
-      return false;
-    }
-
-    await loadYouTubeApi();
-
-    if (playerRef.current && currentVideoIdRef.current === videoId) {
-      return true;
-    }
-
-    if (playerRef.current && typeof playerRef.current.destroy === 'function') {
-      playerRef.current.destroy();
-    }
+    const audioElement = audioRef.current;
 
     setIsPlaying(false);
     setIsPlayerReady(false);
 
-    playerRef.current = new window.YT.Player(playerMountRef.current, {
-      videoId,
-      height: '0',
-      width: '0',
-      playerVars: {
-        autoplay: 0,
-        controls: 0,
-        disablekb: 1,
-        fs: 0,
-        iv_load_policy: 3,
-        modestbranding: 1,
-        playsinline: 1,
-        rel: 0,
-      },
-      events: {
-        onReady: () => {
-          currentVideoIdRef.current = videoId;
-          setIsPlayerReady(true);
-          durationRef.current = getDuration();
-          applyPlayerAudioSettings();
+    if (videoId && playerMountRef.current) {
+      modeRef.current = 'youtube';
+
+      if (audioElement) {
+        audioElement.pause();
+      }
+
+      await loadYouTubeApi();
+
+      if (requestId !== loadRequestIdRef.current) {
+        return false;
+      }
+
+      if (playerRef.current && currentVideoIdRef.current === videoId) {
+        setIsPlayerReady(true);
+        if (autoPlayDuration) {
+          await playAtEpoch(autoPlayDuration);
+        }
+        return true;
+      }
+
+      if (playerRef.current && typeof playerRef.current.destroy === 'function') {
+        playerRef.current.destroy();
+      }
+
+      playerRef.current = new window.YT.Player(playerMountRef.current, {
+        videoId,
+        height: '0',
+        width: '0',
+        playerVars: {
+          autoplay: 0,
+          controls: 0,
+          disablekb: 1,
+          fs: 0,
+          iv_load_policy: 3,
+          modestbranding: 1,
+          playsinline: 1,
+          rel: 0,
         },
-        onStateChange: (event) => {
-          const YT = window.YT;
-          if (!YT) return;
-          if (event.data === YT.PlayerState.PLAYING) {
+        events: {
+          onReady: async () => {
+            if (requestId !== loadRequestIdRef.current) return;
+            currentVideoIdRef.current = videoId;
+            setIsPlayerReady(true);
             durationRef.current = getDuration();
-            setIsPlaying(true);
-          } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
-            setIsPlaying(false);
-          }
+            applyPlayerAudioSettings();
+
+            if (autoPlayDuration) {
+              await playAtEpoch(autoPlayDuration);
+            }
+          },
+          onStateChange: (event) => {
+            const YT = window.YT;
+            if (!YT) return;
+            if (event.data === YT.PlayerState.PLAYING) {
+              durationRef.current = getDuration();
+              setIsPlaying(true);
+            } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+              setIsPlaying(false);
+            }
+          },
         },
-      },
-    });
+      });
+
+      return true;
+    }
+
+    if (!audioElement || !url) {
+      return false;
+    }
+
+    modeRef.current = 'audio';
+
+    const onReady = async () => {
+      if (requestId !== loadRequestIdRef.current) return;
+      setIsPlayerReady(true);
+      durationRef.current = Number(audioElement.duration) || 0;
+      if (autoPlayDuration) {
+        await playAtEpoch(autoPlayDuration);
+      }
+    };
+
+    const onPlay = () => setIsPlaying(true);
+    const onPause = () => setIsPlaying(false);
+    const onEnded = () => setIsPlaying(false);
+
+    audioElement.onloadedmetadata = onReady;
+    audioElement.oncanplay = onReady;
+    audioElement.onplay = onPlay;
+    audioElement.onpause = onPause;
+    audioElement.onended = onEnded;
+
+    if (playerRef.current && typeof playerRef.current.pauseVideo === 'function') {
+      playerRef.current.pauseVideo();
+    }
+
+    audioElement.src = url;
+    audioElement.load();
+    applyPlayerAudioSettings();
 
     return true;
-  }, [applyPlayerAudioSettings, getDuration]);
+  }, [applyPlayerAudioSettings, getDuration, playAtEpoch]);
 
   useEffect(() => {
     applyPlayerAudioSettings();
@@ -242,6 +366,10 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
     return () => {
       if (playerRef.current && typeof playerRef.current.destroy === 'function') {
         playerRef.current.destroy();
+      }
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
       }
       playerRef.current = null;
     };
@@ -268,6 +396,7 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
 
   return {
     playerMountRef,
+    audioRef,
     isPlayerReady,
     isPlaying,
     volume,

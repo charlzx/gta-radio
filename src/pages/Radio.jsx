@@ -47,6 +47,7 @@ export default function Radio() {
 
   const {
     playerMountRef,
+    audioRef,
     isPlayerReady,
     isPlaying,
     volume,
@@ -129,8 +130,11 @@ export default function Radio() {
   // };
 
   // Get active stations (those with audio available)
+  const getStationSourceUrl = useCallback((station) => station?.youtubeUrl || station?.audioUrl || null, []);
+
+  // Get active stations (those with a playable source URL)
   const getActiveStations = (stations) => {
-    return stations.filter(station => station.audioUrl !== null);
+    return stations.filter(station => !!getStationSourceUrl(station));
   };
 
   // Get liked stations from all games
@@ -184,7 +188,8 @@ export default function Radio() {
   };
 
   const handleStationSelect = (station) => {
-    if (!station?.audioUrl) {
+    const stationSourceUrl = getStationSourceUrl(station);
+    if (!stationSourceUrl) {
       return;
     }
 
@@ -205,15 +210,10 @@ export default function Radio() {
 
   // Load YouTube video when station changes.
   useEffect(() => {
-    if (!currentStation?.audioUrl) return;
-    loadFromUrl(currentStation.audioUrl);
-  }, [currentStation, loadFromUrl]);
-
-  // Autoplay synced position once the YouTube player is ready.
-  useEffect(() => {
-    if (!currentStation || !isPlayerReady) return;
-    playAtEpoch(currentStation.duration);
-  }, [currentStation, isPlayerReady, playAtEpoch]);
+    const stationSourceUrl = getStationSourceUrl(currentStation);
+    if (!stationSourceUrl || !currentStation) return;
+    loadFromUrl(stationSourceUrl, { autoPlayDuration: currentStation.duration });
+  }, [currentStation, getStationSourceUrl, loadFromUrl]);
 
   // Mobile-specific handlers
   const handleMobilePlayerExpand = () => {
@@ -442,16 +442,16 @@ export default function Radio() {
                           <li key={`${station.game.id}-${station.id}`}>
                             <button
                               type="button"
-                              onClick={() => { if (!station.audioUrl) return; handleStationSelect(station); setShowSearchDropdown(false); }}
-                              className={`w-full px-2 py-1.5 flex items-center gap-2 ${station.audioUrl ? 'hover:bg-gray-800' : 'opacity-60 cursor-not-allowed'}`}
-                              disabled={!station.audioUrl}
+                                onClick={() => { if (!getStationSourceUrl(station)) return; handleStationSelect(station); setShowSearchDropdown(false); }}
+                                className={`w-full px-2 py-1.5 flex items-center gap-2 ${getStationSourceUrl(station) ? 'hover:bg-gray-800' : 'opacity-60 cursor-not-allowed'}`}
+                                disabled={!getStationSourceUrl(station)}
                             >
                               <img src={station.logo} alt={station.name} className="w-8 h-8 rounded object-cover" />
                               <div className="flex-1 min-w-0 text-left">
                                 <div className="text-white text-sm font-medium truncate">{station.name}</div>
                                 <div className="text-xs text-gray-400 truncate">{station.game.name}</div>
                               </div>
-                              {!station.audioUrl ? (
+                                {!getStationSourceUrl(station) ? (
                                 <span className="text-xs px-2 py-1 rounded bg-gray-700 text-gray-200">Coming Soon</span>
                               ) : (
                                 currentStation?.id === station.id && isPlaying ? (
@@ -858,6 +858,7 @@ export default function Radio() {
       )}
       
       <div ref={playerMountRef} className="fixed w-0 h-0 overflow-hidden opacity-0 pointer-events-none" aria-hidden="true" />
+      <audio ref={audioRef} className="hidden" preload="auto" crossOrigin="anonymous" />
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap');

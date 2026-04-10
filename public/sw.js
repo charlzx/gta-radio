@@ -1,10 +1,9 @@
 // Minimal service worker: simple cache-first strategy for static assets
-const CACHE_NAME = 'gta-radio-cache-v1';
+const CACHE_NAME = 'gta-radio-cache-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
-  '/src/main.jsx',
-  '/src/App.jsx'
+  '/site.webmanifest'
 ];
 
 self.addEventListener('install', (event) => {
@@ -24,8 +23,26 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Simple cache-first
+  const request = event.request;
+  if (request.method !== 'GET') return;
+  if (!request.url.startsWith(self.location.origin)) return;
+
+  // Cache-first for same-origin requests with safe network fallback.
   event.respondWith(
-    caches.match(event.request).then((resp) => resp || fetch(event.request))
+    caches.match(request).then((cached) => {
+      if (cached) return cached;
+
+      return fetch(request)
+        .then((response) => {
+          if (response && response.ok && request.url.startsWith(self.location.origin)) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone)).catch(() => {
+              // Ignore background cache errors.
+            });
+          }
+          return response;
+        })
+        .catch(() => new Response('', { status: 503, statusText: 'Service Unavailable' }));
+    })
   );
 });
