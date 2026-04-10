@@ -20,12 +20,14 @@ const Stat = ({ value, label }) => (
 );
 
 export default function Home() {
+  const hasPlayableSource = (station) => !!(station?.youtubeUrl || station?.audioUrl);
+
   // Removed unused formatGameName function
 
   const gameList = useMemo(() => Object.values(gamesData), []);
   const playableStations = useMemo(() => {
     const all = Object.values(gamesData).flatMap((g) =>
-      (g.stations || []).filter((s) => !!s.audioUrl)
+      (g.stations || []).filter((s) => hasPlayableSource(s))
     );
     return all.slice(0, 6);
   }, []);
@@ -189,7 +191,7 @@ export default function Home() {
 
           <div className="grid grid-cols-2 max-[500px]:grid-cols-1 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
             {gameList.map((g) => {
-              const isLive = (g.stations || []).some((s) => !!s.audioUrl);
+              const isLive = (g.stations || []).some((s) => hasPlayableSource(s));
               return (
                 <div
                   key={g.id}
