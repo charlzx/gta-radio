@@ -60,16 +60,11 @@ const GameCard = ({ game, isDisabled, onSelect, isSelected, initialLoading = fal
     return (
       <div
         className={`relative rounded-xl overflow-hidden border border-white/10 w-[200px] xs:w-[160px] h-[112px] xs:h-[90px] flex-shrink-0 group
-          ${isDisabled ? 'opacity-70 grayscale-[50%]' : 'cursor-pointer hover:border-white/30'} ${isMounted ? 'transition-all duration-300' : ''} ${showSkeleton ? 'pointer-events-none select-none' : ''}`
+          ${isDisabled ? 'opacity-70 grayscale-[50%] cursor-not-allowed' : 'cursor-pointer hover:border-white/30'} ${isMounted ? 'transition-all duration-300' : ''} ${showSkeleton ? 'pointer-events-none select-none' : ''}`
         }
         onClick={() => { if (showSkeleton) return; if (!isDisabled) onSelect(game); }}
         aria-disabled={showSkeleton || isDisabled}
       >
-        {/* Pink Active Dot (hidden while skeleton shows) */}
-        {!showSkeleton && isSelected && (
-          <div className="absolute top-2 left-2 xs:top-1.5 xs:left-1.5 w-3 h-3 xs:w-2.5 xs:h-2.5 bg-pink-500 rounded-full border-2 border-white/20 z-20 animate-subtle-blink"></div>
-        )}
-        
         {/* Background Banner */}
         <div className="absolute inset-0 w-full h-full">
           {!bannerLoaded && <LoadingSkeleton className="w-full h-full" />}
@@ -87,17 +82,6 @@ const GameCard = ({ game, isDisabled, onSelect, isSelected, initialLoading = fal
           </div>
         )}
         
-        {/* Status Badge (hidden while skeleton shows) */}
-        {!showSkeleton && isDisabled && (
-          <div className="absolute top-2 right-2 xs:top-1 xs:right-1 text-xs xs:text-[10px] bg-black/60 backdrop-blur-md text-gray-200 px-2 py-1 xs:px-1.5 xs:py-0.5 rounded-full z-10 font-medium">
-            SOON
-          </div>
-        )}
-         {!showSkeleton && !isDisabled && (
-          <div className="absolute top-2 right-2 xs:top-1 xs:right-1 text-xs xs:text-[10px] bg-pink-600/80 backdrop-blur-md text-white px-2 py-1 xs:px-1.5 xs:py-0.5 rounded-full z-10 font-bold">
-            PLAY
-          </div>
-        )}
       </div>
     );
   }
@@ -121,15 +105,10 @@ const GameCard = ({ game, isDisabled, onSelect, isSelected, initialLoading = fal
     <div 
       className={`relative rounded-lg aspect-square flex items-center justify-center overflow-hidden border border-white/10 ${themeColor}
         ${isSelected ? '' : 'hover:border-white/20'} 
-        ${isMobile ? 'p-2' : 'p-4'} ${isMounted ? 'transition-all duration-300' : ''} ${showSkeleton ? 'pointer-events-none select-none' : 'cursor-pointer'}`}
+        ${isMobile ? 'p-2' : 'p-4'} ${isMounted ? 'transition-all duration-300' : ''} ${showSkeleton ? 'pointer-events-none select-none' : isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
       onClick={() => { if (showSkeleton || isDisabled) return; onSelect(game); }}
       aria-disabled={showSkeleton || isDisabled}
     >
-    {/* Pink Active Dot (hidden while skeleton shows) */}
-    {isSelected && !showSkeleton && (
-      <div className="absolute top-2 left-2 w-3 h-3 bg-pink-500 rounded-full border-2 border-white/20 z-20 animate-subtle-blink"></div>
-    )}
-
     {/* Full-card skeleton overlay (covers padding, badges and content) */}
     {showSkeleton && (
       <div className="absolute inset-0 z-40 pointer-events-none">
@@ -160,22 +139,6 @@ const GameCard = ({ game, isDisabled, onSelect, isSelected, initialLoading = fal
       )}
     </div>
 
-    {/* Status badges (hidden while skeleton shows) */}
-    {!showSkeleton && isDisabled && (
-      <div className={`absolute top-2 right-2 text-xs bg-gray-700/90 backdrop-blur-sm text-gray-300 px-2 py-1 rounded-full z-10 ${isMobile ? 'text-[10px] px-1.5 py-0.5' : ''}`}>
-        SOON
-      </div>
-    )}
-    {!showSkeleton && !isDisabled && !isSelected && (
-      <div className={`absolute top-2 right-2 text-xs bg-pink-600/90 backdrop-blur-sm text-white px-2 py-1 rounded-full z-10 ${isMobile ? 'text-[10px] px-1.5 py-0.5' : ''}`}>
-        ACTIVE
-      </div>
-    )}
-    {isSelected && !isMobile && !showSkeleton && (
-      <div className="absolute top-2 right-2 text-xs bg-pink-500/90 backdrop-blur-sm text-white px-2 py-1 rounded-full z-10">
-        SELECTED
-      </div>
-    )}
   </div>
   );
 };

@@ -179,21 +179,23 @@ export default function StationDetails({ gameIdParam, stationIdParam, embedded =
           </div>
         </section>
 
-        <section className="mt-4 rounded-xl border border-white/10 bg-white/5 p-4">
-          <h3 className="text-lg font-semibold mb-3">Other Stations In {game.name}</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
-            {otherStations.map((s) => (
-              <Link
-                key={s.id}
-                to={`/radio/${game.id}/${s.id}`}
-                className="rounded-lg overflow-hidden border border-white/10 hover:border-white/30 transition-colors"
-              >
-                <img src={s.logo || game.logo} alt={s.name} className="w-full aspect-square object-cover" />
-                <div className="p-2 text-xs truncate">{s.name}</div>
-              </Link>
-            ))}
-          </div>
-        </section>
+        {otherStations.length > 0 && (
+          <section className="mt-4 rounded-xl border border-white/10 bg-white/5 p-4">
+            <h3 className="text-lg font-semibold mb-3">Other Stations In {game.name}</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+              {otherStations.map((s) => (
+                <Link
+                  key={s.id}
+                  to={`/radio/${game.id}/${s.id}`}
+                  className="rounded-lg overflow-hidden border border-white/10 hover:border-white/30 transition-colors"
+                >
+                  <img src={s.logo || game.logo} alt={s.name} className="w-full aspect-square object-cover" />
+                  <div className="p-2 text-xs truncate">{s.name}</div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

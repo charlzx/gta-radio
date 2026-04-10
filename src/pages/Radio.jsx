@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { FaArrowLeft, FaHeart } from 'react-icons/fa';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { games } from '../data/games';
@@ -47,7 +47,10 @@ export default function Radio() {
     const saved = localStorage.getItem('gta-radio-favorites');
     return saved ? new Set(JSON.parse(saved)) : new Set();
   });
-  const [recentlyPlayed, setRecentlyPlayed] = useState([]);
+  const [recentlyPlayed, setRecentlyPlayed] = useState(() => {
+    const saved = localStorage.getItem('gta-radio-recently-played');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [pendingTrackStart, setPendingTrackStart] = useState(null);
 
@@ -159,6 +162,10 @@ export default function Radio() {
     });
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem('gta-radio-recently-played', JSON.stringify(recentlyPlayed));
+  }, [recentlyPlayed]);
+
   // Filter stations based on search and genre (currently unused; will be re-enabled with full search UI)
   // const getFilteredStations = (stations) => {
   //   return stations.filter(station => {
@@ -176,6 +183,51 @@ export default function Radio() {
     return stations.filter(station => !!getStationSourceUrl(station));
   };
 
+  // Cross-game genre groups using station metadata
+  const genreGroups = useMemo(() => {
+    const groups = new Map();
+
+    Object.values(gameData).forEach((game) => {
+      (game.stations || []).forEach((station) => {
+        if (!getStationSourceUrl(station)) return;
+
+        const rawGenre = station?.stationMeta?.info?.genre;
+        if (!rawGenre) return;
+
+        const tokens = rawGenre
+          .split('/')
+          .flatMap((part) => part.split(','))
+          .map((part) => part.trim())
+          .filter(Boolean);
+
+        const stationWithGame = { ...station, game };
+
+        tokens.forEach((token) => {
+          const key = token.toLowerCase();
+          if (!groups.has(key)) {
+            groups.set(key, {
+              key,
+              label: token,
+              stations: [],
+              stationIds: new Set(),
+            });
+          }
+
+          const bucket = groups.get(key);
+          if (!bucket.stationIds.has(station.id)) {
+            bucket.stationIds.add(station.id);
+            bucket.stations.push(stationWithGame);
+          }
+        });
+      });
+    });
+
+    return [...groups.values()]
+      .map((group) => ({ key: group.key, label: group.label, stations: group.stations }))
+      .filter((group) => group.stations.length > 0)
+      .sort((a, b) => b.stations.length - a.stations.length);
+  }, [gameData, getStationSourceUrl]);
+
   // Get liked stations from all games
   const getLikedStations = () => {
     const allStations = [];
@@ -191,14 +243,7 @@ export default function Radio() {
 
   const handleGameSelect = (game) => {
     setSelectedGameView(game);
-    
-    // Only reset station if switching to a different game than the one currently playing
-    if (currentStation && currentGame.id !== game.id) {
-      pause();
-      setCurrentStation(null);
-      setNowPlaying({ type: '', artist: 'GTA Live Radio', title: `Select a ${game.name} station` });
-    }
-    
+
     setCurrentGame(game);
     
     // Push state to browser history for proper back button navigation
@@ -749,7 +794,7 @@ export default function Radio() {
                     <GameCard 
                       key={game.id}
                       game={game} 
-                      isDisabled={game.id !== 'vcs'} // Only VCS is active for now
+                      isDisabled={!game.stations || game.stations.length === 0}
                       onSelect={handleGameSelect}
                       isSelected={currentGame.id === game.id && !selectedGameView}
                       initialLoading={initialLoading}
@@ -757,6 +802,58 @@ export default function Radio() {
                   ))}
                 </div>
               </section>
+
+              {genreGroups.length > 0 && (
+                <section className="mt-6">
+                  <h2 className="text-xl sm:text-lg xs:text-base font-bold mb-3">Browse by Genre</h2>
+                  <div className="space-y-5">
+                    {genreGroups.slice(0, 8).map((group) => (
+                      <div key={group.key}>
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="text-base font-semibold text-white">{group.label}</h3>
+                          <span className="text-xs text-gray-400">{group.stations.length} stations</span>
+                        </div>
+                        {isMobile ? (
+                          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                            {group.stations.slice(0, 10).map((station) => (
+                              <div key={`${group.key}-${station.id}`} className="relative w-[120px] flex-shrink-0">
+                                <StationCard
+                                  station={station}
+                                  onSelect={handleStationSelect}
+                                  isSelected={currentStation?.id === station.id}
+                                  isPlaying={isPlaying}
+                                  size="compact"
+                                  initialLoading={initialLoading}
+                                />
+                                <div className="absolute top-2 left-2 text-[10px] bg-black/70 backdrop-blur-sm text-white px-1.5 py-0.5 rounded-full z-10">
+                                  {station.game.name.split(' - ')[1] || station.game.name}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                            {group.stations.slice(0, 8).map((station) => (
+                              <div key={`${group.key}-${station.id}`} className="relative">
+                                <StationCard
+                                  station={station}
+                                  onSelect={handleStationSelect}
+                                  isSelected={currentStation?.id === station.id}
+                                  isPlaying={isPlaying}
+                                  initialLoading={initialLoading}
+                                />
+                                <div className="absolute top-2 left-2 text-xs bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded-full z-10">
+                                  {station.game.name.split(' - ')[1] || station.game.name}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               {/* Liked Channels Section */}
               {getLikedStations().length > 0 && (
@@ -870,7 +967,7 @@ export default function Radio() {
                         </div>
                       ) : (
                         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-                          {activeStations.slice(0, 6).map(station => (
+                          {activeStations.map(station => (
                             <StationCard 
                               key={station.id} 
                               station={station} 
@@ -881,14 +978,6 @@ export default function Radio() {
                             />
                           ))}
                         </div>
-                      )}
-                      {!isMobile && activeStations.length > 6 && (
-                        <button 
-                          onClick={() => handleGameSelect(currentGame)}
-                          className="mt-4 px-4 py-2 bg-pink-500/20 hover:bg-pink-500/30 border border-pink-500/50 rounded-lg transition-colors text-pink-300"
-                        >
-                          View All {activeStations.length} Active Stations →
-                        </button>
                       )}
                       {currentGame.stations.length > activeStations.length && (
                         <p className="mt-2 text-gray-400 text-sm">
