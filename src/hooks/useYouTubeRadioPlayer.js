@@ -325,7 +325,12 @@ export function useYouTubeRadioPlayer({ radioEpoch = '2024-01-01T00:00:00Z' } = 
         audioElement.pause();
       }
 
-      await loadYouTubeApi();
+      try {
+        await loadYouTubeApi();
+      } catch (err) {
+        console.error('YouTube API load failed:', err);
+        return false;
+      }
 
       if (requestId !== loadRequestIdRef.current) {
         return false;
