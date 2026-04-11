@@ -81,6 +81,7 @@ export default function Radio() {
   const mainRef = useRef(null);
   const wasPlayingBeforeHideRef = useRef(false);
   const lastAppliedQueryRef = useRef('');
+  const lastHandledEndedAtRef = useRef(0);
 
   const detailsMatch = location.pathname.match(/^\/radio\/([^/]+)\/([^/]+)$/);
   const isSettingsRoute = /^\/radio\/settings\/?$/.test(location.pathname);
@@ -460,6 +461,8 @@ export default function Radio() {
 
   useEffect(() => {
     if (!lastEndedAt || !currentStation) return;
+    if (lastEndedAt === lastHandledEndedAtRef.current) return;
+    lastHandledEndedAtRef.current = lastEndedAt;
 
     if (loopOnEnd) {
       setIsSynced(false);
@@ -636,7 +639,7 @@ export default function Radio() {
       <header className="sticky top-0 z-20 bg-gradient-to-b from-black/60 to-black/30 backdrop-blur-xl border-b border-white/5 text-white">
         <div className="relative px-3 py-2">
           {/* Centered search bar */}
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center pr-12 sm:pr-0">
             <div className="relative w-full max-w-sm">
               <SearchFilter
                 className="mb-0"
