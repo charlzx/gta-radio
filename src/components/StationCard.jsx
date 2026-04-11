@@ -6,6 +6,7 @@ import LoadingSkeleton from './LoadingSkeleton';
 const StationCard = ({ station, onSelect, isSelected, isPlaying, size = 'default', compactMinWidth = 120, initialLoading = false }) => {
   const isMobile = useIsMobile();
   const isCompact = size === 'compact';
+  const isPlayable = !!(station?.youtubeUrl || station?.audioUrl);
   
   const [imgLoaded, setImgLoaded] = useState(false);
   const [showSkeleton, setShowSkeleton] = useState(initialLoading);
@@ -35,11 +36,11 @@ const StationCard = ({ station, onSelect, isSelected, isPlaying, size = 'default
     <div 
       className={`station-card relative rounded-lg overflow-hidden transition-all duration-300 ease-in-out group cursor-pointer border border-white/10
         ${isSelected ? '' : 'hover:border-white/20'}
-        ${!station.audioUrl ? 'opacity-60' : 'hover:scale-[1.01]'}
+        ${!isPlayable ? 'opacity-60' : 'hover:scale-[1.01]'}
         ${isCompact ? 'flex-shrink-0 w-full aspect-square' : ''}
         ${showSkeleton ? 'pointer-events-none select-none' : ''}`} 
       style={isCompact ? { minWidth: typeof compactMinWidth === 'number' ? `${compactMinWidth}px` : compactMinWidth } : undefined}
-      onClick={() => { if (showSkeleton) return; if (station.audioUrl) onSelect(station); }}
+      onClick={() => { if (showSkeleton) return; if (isPlayable) onSelect(station); }}
       aria-disabled={showSkeleton}
     >
       {/* Pink Active Dot (hide while skeleton showing) */}
@@ -65,16 +66,16 @@ const StationCard = ({ station, onSelect, isSelected, isPlaying, size = 'default
       {!showSkeleton && (
         <div className={`absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end 
           ${isCompact || isMobile ? 'p-2 xs:p-1.5' : 'p-3'} 
-          ${!station.audioUrl ? 'bg-black/70' : ''}`}>
+          ${!isPlayable ? 'bg-black/70' : ''}`}>
           <h3 className={`font-bold text-white 
             ${isCompact || isMobile ? 'text-xs xs:text-[10px]' : 'text-sm'}`}>{station.name}</h3>
-          {!station.audioUrl && (
+          {!isPlayable && (
             <span className={`text-gray-400 mt-1 
               ${isCompact || isMobile ? 'text-[10px] xs:text-[8px]' : 'text-xs'}`}>Coming Soon</span>
           )}
         </div>
       )}
-      {station.audioUrl && !showSkeleton && (
+      {isPlayable && !showSkeleton && (
         <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           {isSelected && isPlaying ? (
             <FaPause className={`text-white 

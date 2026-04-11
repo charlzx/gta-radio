@@ -1,10 +1,9 @@
-// Minimal service worker: simple cache-first strategy for static assets
-const CACHE_NAME = 'gta-radio-cache-v1';
+// Minimal service worker with reliable SPA navigation fallback.
+const CACHE_NAME = 'gta-radio-cache-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
-  '/src/main.jsx',
-  '/src/App.jsx'
+  '/site.webmanifest'
 ];
 
 self.addEventListener('install', (event) => {
@@ -24,8 +23,37 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Simple cache-first
+  const request = event.request;
+  if (request.method !== 'GET') return;
+  if (!request.url.startsWith(self.location.origin)) return;
+
+  // For SPA navigations, prefer network and fall back to cached shell.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(async () => {
+        const cachedIndex = await caches.match('/index.html');
+        return cachedIndex || new Response('', { status: 503, statusText: 'Service Unavailable' });
+      })
+    );
+    return;
+  }
+
+  // Cache-first for same-origin static requests with safe network fallback.
   event.respondWith(
-    caches.match(event.request).then((resp) => resp || fetch(event.request))
+    caches.match(request).then((cached) => {
+      if (cached) return cached;
+
+      return fetch(request)
+        .then((response) => {
+          if (response && response.ok) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone)).catch(() => {
+              // Ignore background cache errors.
+            });
+          }
+          return response;
+        })
+        .catch(() => new Response('', { status: 503, statusText: 'Service Unavailable' }));
+    })
   );
 });

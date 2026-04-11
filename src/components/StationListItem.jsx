@@ -59,6 +59,7 @@ const StationListItem = ({
   initialLoading = false,
 }) => {
   const [thumbLoading, setThumbLoading] = useState(initialLoading);
+  const isPlayable = !!(station?.youtubeUrl || station?.audioUrl);
   const formatDuration = (seconds) => {
     if (!seconds) return '--:--';
     const mins = Math.floor(seconds / 60);
@@ -70,9 +71,9 @@ const StationListItem = ({
     <div 
       className={`group flex items-center gap-3 rounded-lg transition-all duration-200 ${thumbLoading ? 'pointer-events-none select-none' : 'cursor-pointer'} hover:bg-white/5 relative
         ${isSelected ? 'bg-pink-500/10' : ''}
-        ${!station.audioUrl ? 'opacity-60' : ''}
+        ${!isPlayable ? 'opacity-60' : ''}
         ${isMobile ? 'p-2 xs:p-1.5 min-h-[56px] xs:min-h-[48px] border border-white/5 bg-white/5' : 'p-3'}`}
-      onClick={() => { if (thumbLoading) return; if (station.audioUrl) onSelect(station); }}
+      onClick={() => { if (thumbLoading) return; if (isPlayable) onSelect(station); }}
       aria-disabled={thumbLoading}
     >
       {/* Track Number / Play Button */}
@@ -82,7 +83,7 @@ const StationListItem = ({
         ) : (
           <span className="group-hover:hidden">{index + 1}</span>
         )}
-        {!isSelected && station.audioUrl && (
+        {!isSelected && isPlayable && (
           <FaPlay className={`hidden group-hover:block ${isMobile ? 'w-4 h-4 xs:w-3 xs:h-3' : 'w-4 h-4'}`} />
         )}
       </div>
@@ -123,7 +124,7 @@ const StationListItem = ({
           )}
         </button>
 
-        {!thumbLoading && (!isMobile && !station.audioUrl ? (
+        {!thumbLoading && (!isMobile && !isPlayable ? (
           <span className="bg-gray-700 text-gray-300 rounded px-2 py-1 text-xs">Coming Soon</span>
         ) : !isMobile && isSelected ? (
           <div className="flex items-center gap-1">

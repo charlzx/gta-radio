@@ -134,15 +134,18 @@ const NowPlayingCard = ({
           <div className="flex-1 min-w-0">
             <div className="text-white font-bold truncate">{currentStation.name}</div>
             <div className="text-[11px] text-gray-400">{currentGame.name}</div>
-            <div className="text-pink-300 text-sm truncate mt-0.5">
-              {nowPlaying?.type === 'Song' && nowPlaying.artist ? `${nowPlaying.artist} — ${nowPlaying.title}` : nowPlaying?.title || 'Tuned' }
-            </div>
           </div>
         </div>
+
       </div>
 
-      {/* Card 2: Progress + Transport */}
+      {/* Card 2: Live Now Playing */}
       <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-lg p-4">
+        <div className="text-[11px] uppercase tracking-wide text-gray-400 mb-2">Live Now Playing</div>
+        <div className="text-sm text-pink-300 truncate">
+          {nowPlaying?.type === 'Song' && nowPlaying.artist ? `${nowPlaying.artist} — ${nowPlaying.title}` : nowPlaying?.title || 'Tuned'}
+        </div>
+        <div className="text-xs text-gray-400 mt-0.5 mb-2">{nowPlaying?.type || 'Info'}</div>
         <div className="flex justify-between text-[11px] text-gray-400">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>

@@ -47,7 +47,7 @@ const VolumeControl = ({ volume, isMuted, onVolumeChange, onToggleMute }) => {
         />
       </div>
       
-      <style jsx>{`
+      <style>{`
         input[type="range"]::-webkit-slider-thumb {
           -webkit-appearance: none;
           appearance: none;
