@@ -292,6 +292,17 @@ export default function Radio() {
     addToRecentlyPlayed(station);
   };
 
+  const resolveStationGame = useCallback((station) => {
+    if (station?.game) return station.game;
+    return Object.values(gameData).find((g) => (g.stations || []).some((s) => s.id === station?.id)) || null;
+  }, [gameData]);
+
+  const handleStationCardOpenDetails = useCallback((station) => {
+    const game = resolveStationGame(station);
+    if (!game) return;
+    navigate(`/radio/${game.id}/${station.id}`);
+  }, [navigate, resolveStationGame]);
+
   useEffect(() => {
     const queryGameId = searchParams.get('game');
     const queryStationId = searchParams.get('station');
@@ -819,7 +830,7 @@ export default function Radio() {
                               <div key={`${group.key}-${station.id}`} className="relative w-[120px] flex-shrink-0">
                                 <StationCard
                                   station={station}
-                                  onSelect={handleStationSelect}
+                                  onSelect={handleStationCardOpenDetails}
                                   isSelected={currentStation?.id === station.id}
                                   isPlaying={isPlaying}
                                   size="compact"
@@ -837,7 +848,7 @@ export default function Radio() {
                               <div key={`${group.key}-${station.id}`} className="relative">
                                 <StationCard
                                   station={station}
-                                  onSelect={handleStationSelect}
+                                  onSelect={handleStationCardOpenDetails}
                                   isSelected={currentStation?.id === station.id}
                                   isPlaying={isPlaying}
                                   initialLoading={initialLoading}
@@ -868,7 +879,7 @@ export default function Radio() {
                         <div key={station.id} className="relative min-w-[120px]">
                           <StationCard 
                             station={station} 
-                            onSelect={handleStationSelect} 
+                            onSelect={handleStationCardOpenDetails} 
                             isSelected={currentStation?.id === station.id} 
                             isPlaying={isPlaying}
                               size="compact"
@@ -886,7 +897,7 @@ export default function Radio() {
                         <div key={station.id} className="relative">
                           <StationCard 
                             station={station} 
-                            onSelect={handleStationSelect} 
+                            onSelect={handleStationCardOpenDetails} 
                             isSelected={currentStation?.id === station.id} 
                             isPlaying={isPlaying} 
                             initialLoading={initialLoading}
@@ -918,7 +929,7 @@ export default function Radio() {
                           <div key={station.id} className="w-[104px] flex-shrink-0">
                             <StationCard 
                               station={station}
-                              onSelect={handleStationSelect}
+                              onSelect={handleStationCardOpenDetails}
                               isSelected={currentStation?.id === station.id}
                               isPlaying={isPlaying}
                               size="compact"
@@ -934,7 +945,7 @@ export default function Radio() {
                           <StationCard 
                             key={station.id}
                             station={station}
-                            onSelect={handleStationSelect}
+                            onSelect={handleStationCardOpenDetails}
                             isSelected={currentStation?.id === station.id}
                             isPlaying={isPlaying}
                           />
@@ -956,7 +967,7 @@ export default function Radio() {
                             <div key={station.id} className="w-[120px] flex-shrink-0">
                               <StationCard 
                                 station={station} 
-                                onSelect={handleStationSelect} 
+                                onSelect={handleStationCardOpenDetails} 
                                 isSelected={currentStation?.id === station.id} 
                                 isPlaying={isPlaying}
                                 size="compact"
@@ -971,7 +982,7 @@ export default function Radio() {
                             <StationCard 
                               key={station.id} 
                               station={station} 
-                              onSelect={handleStationSelect} 
+                              onSelect={handleStationCardOpenDetails} 
                               isSelected={currentStation?.id === station.id} 
                               isPlaying={isPlaying} 
                               initialLoading={initialLoading}

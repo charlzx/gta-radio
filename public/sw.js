@@ -1,5 +1,5 @@
-// Minimal service worker: simple cache-first strategy for static assets
-const CACHE_NAME = 'gta-radio-cache-v2';
+// Minimal service worker with reliable SPA navigation fallback.
+const CACHE_NAME = 'gta-radio-cache-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -27,7 +27,18 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   if (!request.url.startsWith(self.location.origin)) return;
 
-  // Cache-first for same-origin requests with safe network fallback.
+  // For SPA navigations, prefer network and fall back to cached shell.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(async () => {
+        const cachedIndex = await caches.match('/index.html');
+        return cachedIndex || new Response('', { status: 503, statusText: 'Service Unavailable' });
+      })
+    );
+    return;
+  }
+
+  // Cache-first for same-origin static requests with safe network fallback.
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return cached;
