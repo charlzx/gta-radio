@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { FaArrowLeft, FaHeart } from 'react-icons/fa';
+import { FaArrowLeft, FaHeart, FaCog } from 'react-icons/fa';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { games } from '../data/games';
 import GameCard from '../components/GameCard';
@@ -13,6 +13,7 @@ import SearchFilter from '../components/SearchFilter';
 import RecentlyPlayedCard from '../components/RecentlyPlayedCard';
 import PlaylistView from '../components/PlaylistView';
 import StationDetails from './StationDetails';
+import Settings from './Settings';
 import { useYouTubeRadioPlayer } from '../hooks/useYouTubeRadioPlayer';
 import { useIsMobile } from '../hooks/useIsMobile';
 
@@ -33,6 +34,8 @@ export default function Radio() {
   const [isPlaylistOpen, setIsPlaylistOpen] = useState(false);
   const [loopOnEnd, setLoopOnEnd] = useState(() => localStorage.getItem('gta-radio-loop-on-end') === 'true');
   const [shuffleOnEnd, setShuffleOnEnd] = useState(() => localStorage.getItem('gta-radio-shuffle-on-end') === 'true');
+  const [qualityPreference, setQualityPreference] = useState(() => localStorage.getItem('gta-radio-quality') || 'auto');
+  const playbackEndMode = loopOnEnd ? 'loop' : (shuffleOnEnd ? 'shuffle' : 'off');
 
   // Mobile-specific states
   const isMobile = useIsMobile();
@@ -80,6 +83,7 @@ export default function Radio() {
   const lastAppliedQueryRef = useRef('');
 
   const detailsMatch = location.pathname.match(/^\/radio\/([^/]+)\/([^/]+)$/);
+  const isSettingsRoute = /^\/radio\/settings\/?$/.test(location.pathname);
   const detailsGameId = detailsMatch?.[1] || null;
   const detailsStationId = detailsMatch?.[2] || null;
   const isDetailsRoute = Boolean(detailsMatch);
@@ -120,28 +124,27 @@ export default function Radio() {
 
   const handleToggleMute = useCallback(() => toggleMute(), [toggleMute]);
 
-  const handleToggleLoopOnEnd = useCallback(() => {
-    setLoopOnEnd((prev) => {
-      const next = !prev;
-      localStorage.setItem('gta-radio-loop-on-end', next.toString());
-      if (next) {
-        setShuffleOnEnd(false);
-        localStorage.setItem('gta-radio-shuffle-on-end', 'false');
-      }
-      return next;
-    });
-  }, []);
+  const handlePlaybackEndModeChange = useCallback((mode) => {
+    if (mode === 'loop') {
+      setLoopOnEnd(true);
+      setShuffleOnEnd(false);
+      localStorage.setItem('gta-radio-loop-on-end', 'true');
+      localStorage.setItem('gta-radio-shuffle-on-end', 'false');
+      return;
+    }
 
-  const handleToggleShuffleOnEnd = useCallback(() => {
-    setShuffleOnEnd((prev) => {
-      const next = !prev;
-      localStorage.setItem('gta-radio-shuffle-on-end', next.toString());
-      if (next) {
-        setLoopOnEnd(false);
-        localStorage.setItem('gta-radio-loop-on-end', 'false');
-      }
-      return next;
-    });
+    if (mode === 'shuffle') {
+      setLoopOnEnd(false);
+      setShuffleOnEnd(true);
+      localStorage.setItem('gta-radio-loop-on-end', 'false');
+      localStorage.setItem('gta-radio-shuffle-on-end', 'true');
+      return;
+    }
+
+    setLoopOnEnd(false);
+    setShuffleOnEnd(false);
+    localStorage.setItem('gta-radio-loop-on-end', 'false');
+    localStorage.setItem('gta-radio-shuffle-on-end', 'false');
   }, []);
 
   const handleToggleFavorite = (stationId) => {
@@ -152,8 +155,11 @@ export default function Radio() {
       newFavorites.add(stationId);
     }
     setFavorites(newFavorites);
-    localStorage.setItem('gta-radio-favorites', JSON.stringify([...newFavorites]));
   };
+
+  useEffect(() => {
+    localStorage.setItem('gta-radio-favorites', JSON.stringify([...favorites]));
+  }, [favorites]);
 
   const addToRecentlyPlayed = useCallback((station) => {
     setRecentlyPlayed(prev => {
@@ -175,8 +181,22 @@ export default function Radio() {
   //   });
   // };
 
-  // Get active stations (those with audio available)
-  const getStationSourceUrl = useCallback((station) => station?.audioUrl || station?.youtubeUrl || null, []);
+  const handleQualityChange = useCallback((quality) => {
+    setQualityPreference(quality);
+    localStorage.setItem('gta-radio-quality', quality);
+  }, []);
+
+  // Resolve best source by quality preference.
+  const getStationSourceUrl = useCallback((station) => {
+    if (!station) return null;
+
+    if (qualityPreference === 'data-saver') {
+      return station.youtubeUrl || station.audioUrl || null;
+    }
+
+    // auto/high prefer direct audio when available.
+    return station.audioUrl || station.youtubeUrl || null;
+  }, [qualityPreference]);
 
   // Get active stations (those with a playable source URL)
   const getActiveStations = (stations) => {
@@ -342,6 +362,18 @@ export default function Radio() {
     setSearchQuery('');
     navigate(`/radio/${gameForRoute.id}/${station.id}`);
   };
+
+  const handleSettingsToggle = () => {
+    navigate(isSettingsRoute ? '/radio' : '/radio/settings');
+  };
+
+  const handleClearLiked = useCallback(() => {
+    setFavorites(new Set());
+  }, []);
+
+  const handleClearRecentlyPlayed = useCallback(() => {
+    setRecentlyPlayed([]);
+  }, []);
 
   useEffect(() => {
     if (!pendingTrackStart || !currentStation || !isPlayerReady) return;
@@ -662,6 +694,19 @@ export default function Radio() {
             </div>
           </div>
 
+          <button
+            onClick={handleSettingsToggle}
+            className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full border transition-colors ${
+              isSettingsRoute
+                ? 'bg-pink-600 border-pink-500 text-white'
+                : 'bg-white/10 border-white/10 text-white hover:bg-white/20'
+            }`}
+            aria-label={isSettingsRoute ? 'Close settings' : 'Open settings'}
+            title={isSettingsRoute ? 'Close settings' : 'Settings'}
+          >
+            <FaCog className="w-4 h-4" />
+          </button>
+
           {/* Sidebar toggle removed on mobile per feedback */}
         </div>
       </header>
@@ -691,10 +736,6 @@ export default function Radio() {
               isSynced={isSynced}
               onGoLive={goLive}
               onOpenPlaylist={() => setIsPlaylistOpen(true)}
-              loopOnEnd={loopOnEnd}
-              shuffleOnEnd={shuffleOnEnd}
-              onToggleLoopOnEnd={handleToggleLoopOnEnd}
-              onToggleShuffleOnEnd={handleToggleShuffleOnEnd}
             />
             
             {/* Recently Played Card */}
@@ -713,7 +754,18 @@ export default function Radio() {
         {/* Right Panel: Main Content */}
   <main ref={mainRef} className={`${isMobile ? 'w-full pb-safe overflow-x-hidden' : 'md:col-span-2 lg:col-span-3'} bg-black/30 backdrop-blur-lg rounded-lg overflow-y-auto ${isMobile ? 'scrollbar-hide' : 'custom-scrollbar'} min-h-0 shadow-inner shadow-white/5`}>
           <div className="p-0 sm:p-4">
-          {isDetailsRoute ? (
+          {isSettingsRoute ? (
+            <Settings
+              playbackEndMode={playbackEndMode}
+              onPlaybackEndModeChange={handlePlaybackEndModeChange}
+              qualityPreference={qualityPreference}
+              onQualityChange={handleQualityChange}
+              likedCount={favorites.size}
+              recentlyPlayedCount={recentlyPlayed.length}
+              onClearLiked={handleClearLiked}
+              onClearRecentlyPlayed={handleClearRecentlyPlayed}
+            />
+          ) : isDetailsRoute ? (
             <StationDetails gameIdParam={detailsGameId} stationIdParam={detailsStationId} embedded />
           ) : selectedGameView ? (
             // Single Game View - Mobile-optimized List
@@ -1040,10 +1092,6 @@ export default function Radio() {
           isSynced={isSynced}
           onGoLive={goLive}
           onOpenPlaylist={() => setIsPlaylistOpen(true)}
-          loopOnEnd={loopOnEnd}
-          shuffleOnEnd={shuffleOnEnd}
-          onToggleLoopOnEnd={handleToggleLoopOnEnd}
-          onToggleShuffleOnEnd={handleToggleShuffleOnEnd}
         />
       )}
 
@@ -1082,7 +1130,6 @@ export default function Radio() {
             isSynced={isSynced}
             onGoLive={goLive}
             onOpenPlaylist={() => setIsPlaylistOpen(true)}
-            onTrackClick={handleTrackClick}
           />
         </div>
       )}
