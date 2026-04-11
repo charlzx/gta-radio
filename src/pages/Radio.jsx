@@ -474,7 +474,7 @@ export default function Radio() {
     };
 
     updateNowPlaying();
-    const id = setInterval(updateNowPlaying, 250);
+    const id = setInterval(updateNowPlaying, 1000);
     return () => clearInterval(id);
   }, [currentStation, nowPlaying.title, setActiveDuration, getCurrentTime, getDuration]);
 
