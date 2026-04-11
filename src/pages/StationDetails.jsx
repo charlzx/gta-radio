@@ -90,10 +90,10 @@ export default function StationDetails({ gameIdParam, stationIdParam, embedded =
             <h1 className="mt-4 text-2xl font-bold">{station.name}</h1>
             <p className="text-sm text-gray-400 mt-1">{game.name}</p>
             <Link
-              to={`/radio?game=${game.id}&station=${station.id}`}
+              to={`/radio/${game.id}/${station.id}?game=${game.id}&station=${station.id}`}
               className="mt-4 inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-pink-600 hover:bg-pink-500 text-white text-sm font-semibold"
             >
-              <Radio size={16} /> Open Player
+              <Radio size={16} /> Play
             </Link>
           </div>
 
@@ -158,7 +158,7 @@ export default function StationDetails({ gameIdParam, stationIdParam, embedded =
               return (
                 <Link
                   key={`${track.title}-${track.startTime}`}
-                  to={`/radio/${game.id}/${station.id}?game=${game.id}&station=${station.id}&start=${track.startTime}`}
+                  to={`/radio?game=${game.id}&station=${station.id}&start=${track.startTime}`}
                   className={`py-2.5 px-1 flex items-center gap-3 transition-colors hover:bg-white/5 ${isCurrent ? 'bg-pink-500/10 rounded' : ''}`}
                 >
                   <div className={`w-6 text-xs text-center ${isCurrent ? 'text-pink-300' : 'text-gray-500'}`}>

@@ -1,5 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Repeat, Shuffle, Heart, Clock3, Trash2, Radio } from 'lucide-react';
+import { FaArrowLeft } from 'react-icons/fa';
 
 const qualityOptions = [
   {
@@ -32,6 +34,12 @@ export default function Settings({
   return (
     <div className="px-1 sm:px-0 pb-4">
       <div className="sticky top-0 bg-black/90 backdrop-blur-md border-b border-white/5 z-20 -mx-4 px-4 py-3 mb-4">
+        <Link
+          to="/radio"
+          className="inline-flex items-center gap-2 mb-2 text-sm text-gray-300 hover:text-white"
+        >
+          <FaArrowLeft className="w-3.5 h-3.5" /> Back
+        </Link>
         <h2 className="text-3xl sm:text-2xl xs:text-xl font-extrabold text-white">Settings</h2>
         <p className="text-gray-400 sm:text-sm xs:text-xs mt-0.5">Playback behavior and data preferences.</p>
       </div>
