@@ -34,7 +34,7 @@ self.addEventListener('fetch', (event) => {
 
       return fetch(request)
         .then((response) => {
-          if (response && response.ok && request.url.startsWith(self.location.origin)) {
+          if (response && response.ok) {
             const responseClone = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone)).catch(() => {
               // Ignore background cache errors.
