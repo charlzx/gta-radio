@@ -31,15 +31,15 @@ A GTA-inspired radio web app with synchronized playback, station browsing, and s
 git clone https://github.com/charlzx/gta-radio.git
 cd gta-radio
 
-npm install
+pnpm install
 
-npm run dev
+pnpm dev
 ```
 
 ### Build
 ```bash
-npm run build
-npm run preview
+pnpm build
+pnpm preview
 ```
 
 ## Tech Stack
@@ -62,10 +62,10 @@ npm run preview
 
 ### Available Scripts
 ```bash
-npm run dev
-npm run build
-npm run preview
-npm run lint
+pnpm dev
+pnpm build
+pnpm preview
+pnpm lint
 ```
 
 ## Currently Available
@@ -96,8 +96,8 @@ We welcome contributions to make GTA Radio even better! Here's how you can help:
 1. **Fork** the repository on GitHub
 2. **Clone** your fork: `git clone https://github.com/charlzx/gta-radio.git`
 3. **Create** a feature branch: `git checkout -b feature/your-feature`
-4. **Install** dependencies: `npm install`
-5. **Start** development: `npm run dev`
+4. **Install** dependencies: `pnpm install`
+5. **Start** development: `pnpm dev`
 
 ### **Development Guidelines**
 - Follow existing code style and component patterns
